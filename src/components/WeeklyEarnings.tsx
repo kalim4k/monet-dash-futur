@@ -4,13 +4,13 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 // Sample data - in a real app, this would come from an API
 const data = [
-  { name: "Lun", earnings: 24000 },
-  { name: "Mar", earnings: 32000 },
-  { name: "Mer", earnings: 28000 },
-  { name: "Jeu", earnings: 42000 },
-  { name: "Ven", earnings: 54000 },
-  { name: "Sam", earnings: 68000 },
-  { name: "Dim", earnings: 76000 },
+  { name: "Lun", earnings: 240 },
+  { name: "Mar", earnings: 320 },
+  { name: "Mer", earnings: 280 },
+  { name: "Jeu", earnings: 420 },
+  { name: "Ven", earnings: 540 },
+  { name: "Sam", earnings: 680 },
+  { name: "Dim", earnings: 700 },
 ];
 
 const formatNumber = (number: number) => {
@@ -25,7 +25,7 @@ export function WeeklyEarnings() {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+          <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
             <XAxis 
               dataKey="name" 
@@ -34,10 +34,11 @@ export function WeeklyEarnings() {
               tick={{ fontSize: 12 }} 
             />
             <YAxis 
-              tickFormatter={(value) => `${value / 1000}k`} 
+              tickFormatter={(value) => `${value} FCFA`} 
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12 }}
+              domain={[0, 700]}
             />
             <Tooltip 
               formatter={(value: number) => [`${formatNumber(value)} FCFA`, "Gains"]} 
