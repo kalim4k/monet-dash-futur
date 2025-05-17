@@ -16,7 +16,7 @@ const History = () => {
             </p>
           </header>
           
-          <div className="border p-6 rounded-lg shadow-sm bg-white">
+          <div className="border p-4 sm:p-6 rounded-lg shadow-sm bg-white">
             <h3 className="font-semibold">Contenu à venir</h3>
             <p className="text-muted-foreground mt-2">
               Cette page est en cours de développement

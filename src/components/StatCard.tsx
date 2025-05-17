@@ -14,11 +14,11 @@ export function StatCard({ title, value, icon, description, className }: StatCar
   return (
     <Card className={cn("overflow-hidden transition-all hover:shadow-md", className)}>
       <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-        <div className="p-2 bg-primary/10 rounded-md text-primary">{icon}</div>
+        <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <div className="p-1.5 sm:p-2 bg-primary/10 rounded-md text-primary">{icon}</div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-xl sm:text-2xl font-bold">{value}</div>
         {description && (
           <p className="text-xs text-muted-foreground mt-1">{description}</p>
         )}

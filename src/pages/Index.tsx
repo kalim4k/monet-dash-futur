@@ -1,5 +1,5 @@
 
-import { ArrowUpRight, ChevronUp, Award, MousePointer, TrendingUp } from "lucide-react";
+import { ArrowUpRight, ChevronUp, Award, MousePointer, TrendingUp, Facebook, Instagram, Twitter, Youtube, Linkedin } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ClicksPerProductChart } from "@/components/ClicksPerProductChart";
 import { WeeklyEarnings } from "@/components/WeeklyEarnings";
@@ -17,13 +17,20 @@ const Index = () => {
           <header className="mb-8">
             <h1 className="text-3xl font-bold tracking-tight">Tableau de bord</h1>
             <p className="text-muted-foreground mt-1">
-              Bienvenue sur votre tableau de bord de monétisation WhatsApp
+              Bienvenue sur votre tableau de bord de monétisation de vos réseaux sociaux
             </p>
+            <div className="flex space-x-3 mt-2">
+              <Facebook size={20} className="text-[#1877F2]" />
+              <Instagram size={20} className="text-[#E4405F]" />
+              <Twitter size={20} className="text-[#1DA1F2]" />
+              <Youtube size={20} className="text-[#FF0000]" />
+              <Linkedin size={20} className="text-[#0A66C2]" />
+            </div>
           </header>
           
           <section>
             <h2 className="text-xl font-semibold mb-4">Résumé des Gains</h2>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard
                 title="Gains Totaux"
                 value="1,248,750 FCFA"
@@ -51,7 +58,7 @@ const Index = () => {
           
           <section className="mt-10">
             <h2 className="text-xl font-semibold mb-4">Statistiques de Performance</h2>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <WeeklyEarnings />
               <ClicksPerProductChart />
             </div>
