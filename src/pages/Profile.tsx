@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -12,8 +11,8 @@ import {
   Phone, 
   Mail,
   Edit,
-  Telegram,
   Settings,
+  Twitter,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -246,14 +245,14 @@ const Profile = () => {
                       <CardHeader className="pb-2">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-full bg-[#0088cc] flex items-center justify-center">
-                            <Telegram className="h-6 w-6 text-white" />
+                            <Twitter className="h-6 w-6 text-white" />
                           </div>
-                          <CardTitle>Telegram</CardTitle>
+                          <CardTitle>Twitter</CardTitle>
                         </div>
                       </CardHeader>
                       <CardContent>
                         <CardDescription className="mb-4">
-                          Rejoignez notre communauté Telegram pour recevoir des offres exclusives et les dernières nouvelles
+                          Rejoignez notre communauté Twitter pour recevoir des offres exclusives et les dernières nouvelles
                         </CardDescription>
                         <Button className="w-full bg-[#0088cc] hover:bg-[#0088cc]/90">
                           S'abonner
