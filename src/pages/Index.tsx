@@ -10,7 +10,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PlatformsCarousel } from "@/components/PlatformsCarousel";
-import { UserProfileCard } from "@/components/UserProfileCard";
 
 const Index = () => {
   return (
@@ -27,8 +26,6 @@ const Index = () => {
                   Bienvenue sur votre tableau de bord de monétisation de vos réseaux sociaux
                 </p>
               </div>
-              
-              <UserProfileCard />
             </div>
             
             <PlatformsCarousel />

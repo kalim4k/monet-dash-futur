@@ -17,7 +17,8 @@ export function UserProfileCard() {
         ? "bg-gradient-to-r from-primary/20 to-secondary/10 border-0 p-2 flex items-center gap-3"
         : "bg-gradient-to-r from-primary/30 to-secondary/20 border-0 p-2 px-4 flex items-center gap-3"}
       hover:shadow-md transition-all duration-300
-      rounded-xl relative overflow-hidden
+      rounded-xl relative overflow-hidden ml-auto
+      fixed top-4 right-4 z-50
     `}>
       {/* Glowing effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 animate-pulse-slow"></div>

@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { UserProfileCard } from "@/components/UserProfileCard";
 import { PlatformsCarousel } from "@/components/PlatformsCarousel";
 import { PaymentHistoryTable, PaymentHistoryItem } from "@/components/PaymentHistoryTable";
 import { WithdrawalForm } from "@/components/WithdrawalForm";
@@ -50,8 +49,6 @@ const History = () => {
                   Consultez l'historique de vos paiements et transactions
                 </p>
               </div>
-              
-              <UserProfileCard />
             </div>
             
             <PlatformsCarousel />
