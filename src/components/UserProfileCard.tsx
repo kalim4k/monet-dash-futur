@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, LogOut } from "lucide-react";
@@ -16,28 +17,28 @@ export function UserProfileCard() {
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Utilisateur';
   const avatarUrl = user?.user_metadata?.avatar_url;
 
-  // On mobile, show just the avatar
+  // On mobile, show just the avatar but with a larger size
   if (isMobile) {
     return (
       <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <DropdownMenuTrigger className="outline-none">
           <div className="relative">
-            <Avatar className="h-10 w-10 border-2 border-white/30 cursor-pointer">
+            <Avatar className="h-14 w-14 border-2 border-white/30 cursor-pointer shadow-md">
               <AvatarImage src={avatarUrl} />
               <AvatarFallback className="bg-primary/20 text-primary">
-                <User size={18} />
+                <User size={24} />
               </AvatarFallback>
             </Avatar>
             {/* Status indicator */}
-            <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-white"></div>
+            <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full bg-green-500 border-2 border-white"></div>
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56 p-2 bg-white/90 backdrop-blur-md">
+        <DropdownMenuContent align="end" className="w-60 p-2 bg-white/90 backdrop-blur-md">
           <div className="flex items-center gap-3 p-2 border-b mb-1">
-            <Avatar className="h-10 w-10 border-2 border-primary/20">
+            <Avatar className="h-12 w-12 border-2 border-primary/20">
               <AvatarImage src={avatarUrl} />
               <AvatarFallback className="bg-primary/20 text-primary">
-                <User size={18} />
+                <User size={20} />
               </AvatarFallback>
             </Avatar>
             <div>

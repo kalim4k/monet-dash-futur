@@ -31,7 +31,9 @@ const Index = () => {
                 </p>
               </div>
               
-              <UserProfileCard />
+              <div className={isMobile ? "ml-4" : ""}>
+                <UserProfileCard />
+              </div>
             </div>
             
             <PlatformsCarousel />
