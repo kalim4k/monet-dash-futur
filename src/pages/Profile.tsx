@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -11,7 +12,6 @@ import {
   Phone, 
   Mail,
   Edit,
-  Settings,
   Twitter,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +25,7 @@ import { Switch } from "@/components/ui/switch";
 
 const Profile = () => {
   const [language, setLanguage] = useState("fr");
+  const [paymentMethod, setPaymentMethod] = useState("momo");
   
   return (
     <div className="flex min-h-screen bg-[#f8fafc]">
@@ -40,7 +41,7 @@ const Profile = () => {
           </header>
           
           <Tabs defaultValue="user-info" className="w-full">
-            <TabsList className="grid grid-cols-4 mb-8">
+            <TabsList className="grid grid-cols-3 mb-8">
               <TabsTrigger value="user-info" className="flex flex-col items-center gap-2 py-3 sm:flex-row sm:gap-3">
                 <User className="h-5 w-5" />
                 <span className="hidden sm:inline">Profil Utilisateur</span>
@@ -52,10 +53,6 @@ const Profile = () => {
               <TabsTrigger value="notifications" className="flex flex-col items-center gap-2 py-3 sm:flex-row sm:gap-3">
                 <Bell className="h-5 w-5" />
                 <span className="hidden sm:inline">Notifications</span>
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="flex flex-col items-center gap-2 py-3 sm:flex-row sm:gap-3">
-                <Settings className="h-5 w-5" />
-                <span className="hidden sm:inline">Paramètres</span>
               </TabsTrigger>
             </TabsList>
             
@@ -156,7 +153,12 @@ const Profile = () => {
                     <CardDescription>Choisissez comment recevoir vos gains</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <RadioGroup defaultValue="momo" className="space-y-4">
+                    <RadioGroup 
+                      defaultValue={paymentMethod} 
+                      value={paymentMethod}
+                      onValueChange={setPaymentMethod}
+                      className="space-y-4"
+                    >
                       <div className="flex items-center space-x-2 border rounded-lg p-4 hover:bg-accent">
                         <RadioGroupItem value="momo" id="momo" />
                         <Label htmlFor="momo" className="flex-1 cursor-pointer flex items-center gap-2">
@@ -198,7 +200,7 @@ const Profile = () => {
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="payment-type">Type de compte</Label>
-                      <Select defaultValue="momo">
+                      <Select value={paymentMethod} onValueChange={setPaymentMethod}>
                         <SelectTrigger id="payment-type">
                           <SelectValue placeholder="Sélectionner un type de compte" />
                         </SelectTrigger>
@@ -284,101 +286,6 @@ const Profile = () => {
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-            
-            {/* Settings Section */}
-            <TabsContent value="settings">
-              <div className="grid gap-6 md:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Langue de l'application</CardTitle>
-                    <CardDescription>Choisissez votre langue préférée</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <RadioGroup 
-                      defaultValue={language} 
-                      onValueChange={setLanguage}
-                      className="space-y-4"
-                    >
-                      <div className="flex items-center space-x-2 border rounded-lg p-4 hover:bg-accent">
-                        <RadioGroupItem value="fr" id="fr" />
-                        <Label htmlFor="fr" className="flex-1 cursor-pointer flex items-center gap-2">
-                          <div className="h-5 w-8 rounded overflow-hidden flex-shrink-0">
-                            <div className="flex h-full">
-                              <div className="bg-blue-600 h-full w-1/3"></div>
-                              <div className="bg-white h-full w-1/3"></div>
-                              <div className="bg-red-600 h-full w-1/3"></div>
-                            </div>
-                          </div>
-                          <span>Français</span>
-                        </Label>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2 border rounded-lg p-4 hover:bg-accent">
-                        <RadioGroupItem value="en" id="en" />
-                        <Label htmlFor="en" className="flex-1 cursor-pointer flex items-center gap-2">
-                          <div className="h-5 w-8 rounded overflow-hidden flex-shrink-0 bg-blue-800">
-                            {/* Simple Union Jack representation */}
-                            <div className="h-full w-full relative">
-                              <div className="absolute inset-0 bg-white" 
-                                   style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 0% 100%)" }}></div>
-                              <div className="absolute inset-0 bg-red-600" 
-                                   style={{ clipPath: "polygon(0 0, 50% 50%, 0 100%, 0 0)" }}></div>
-                              <div className="absolute inset-0 bg-red-600" 
-                                   style={{ clipPath: "polygon(100% 0, 50% 50%, 100% 100%, 100% 0)" }}></div>
-                            </div>
-                          </div>
-                          <span>English</span>
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </CardContent>
-                  <CardFooter>
-                    <Button>Appliquer</Button>
-                  </CardFooter>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Paramètres de Notifications</CardTitle>
-                    <CardDescription>Gérez vos préférences de notifications</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Notifications par email</p>
-                        <p className="text-sm text-muted-foreground">
-                          Recevoir des notifications par email
-                        </p>
-                      </div>
-                      <Switch defaultChecked id="email-notifications" />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Notifications push</p>
-                        <p className="text-sm text-muted-foreground">
-                          Recevoir des notifications sur votre appareil
-                        </p>
-                      </div>
-                      <Switch id="push-notifications" />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Notifications marketing</p>
-                        <p className="text-sm text-muted-foreground">
-                          Recevoir des offres promotionnelles
-                        </p>
-                      </div>
-                      <Switch id="marketing-notifications" />
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button>Enregistrer les préférences</Button>
-                  </CardFooter>
-                </Card>
-              </div>
             </TabsContent>
           </Tabs>
         </div>
