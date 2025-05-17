@@ -11,8 +11,11 @@ import { Card } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PlatformsCarousel } from "@/components/PlatformsCarousel";
 import { UserProfileCard } from "@/components/UserProfileCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="flex min-h-screen bg-[#f8fafc]">
       <Sidebar />
@@ -20,8 +23,8 @@ const Index = () => {
       <main className="flex-1 pb-16 md:pb-0 w-full">
         <div className="container px-4 sm:px-6 max-w-7xl py-6">
           <header className="mb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-              <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className={isMobile ? "flex-1" : ""}>
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Tableau de bord</h1>
                 <p className="text-muted-foreground mt-1">
                   Bienvenue sur votre tableau de bord de monétisation de vos réseaux sociaux
