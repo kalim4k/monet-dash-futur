@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,25 +21,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Vérifier la session existante
+    // Stable state update function that won't trigger re-renders if values are the same
+    const updateAuthState = (newSession: Session | null) => {
+      setSession(prev => {
+        if (prev?.access_token === newSession?.access_token) return prev;
+        return newSession;
+      });
+      
+      setUser(prev => {
+        if (prev?.id === newSession?.user?.id) return prev;
+        return newSession?.user ?? null;
+      });
+    };
+
+    // First fetch the current session
     const getInitialSession = async () => {
       try {
         setLoading(true);
-        
-        // Établir le listener d'authentification AVANT de vérifier la session
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          (_event, session) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-          }
-        );
-
-        // Vérifier si une session existe déjà
         const { data } = await supabase.auth.getSession();
-        setSession(data.session);
-        setUser(data.session?.user ?? null);
-
-        return subscription; // Retourner la subscription directement
+        updateAuthState(data.session);
       } catch (error) {
         console.error("Erreur d'authentification:", error);
         toast({
@@ -48,24 +47,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           description: "Impossible de récupérer votre session",
           variant: "destructive",
         });
-        return undefined;
       } finally {
         setLoading(false);
       }
     };
 
-    const init = async () => {
-      const subscription = await getInitialSession();
-      return () => {
-        if (subscription) subscription.unsubscribe();
-      };
-    };
+    // Set up auth listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        updateAuthState(session);
+      }
+    );
 
-    const unsubscribe = init();
+    // Initial session fetch
+    getInitialSession();
+
+    // Cleanup
     return () => {
-      unsubscribe.then((unsub) => {
-        if (typeof unsub === "function") unsub();
-      });
+      subscription.unsubscribe();
     };
   }, [toast]);
 

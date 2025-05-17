@@ -1,7 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowUpRight } from "lucide-react";
 
 // Enhanced data with zeroed values
 const data = [{
@@ -41,11 +40,13 @@ export function ClicksPerProductChart() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((product, index) => <TableRow key={product.name}>
+            {data.map((product) => (
+              <TableRow key={product.name}>
                 <TableCell className="font-medium">{product.name}</TableCell>
                 <TableCell className="text-right">{product.clicks.toLocaleString()}</TableCell>
                 <TableCell className="text-right">{product.revenue.toLocaleString()}</TableCell>
-              </TableRow>)}
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </CardContent>
