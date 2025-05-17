@@ -40,9 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(data.session);
         setUser(data.session?.user ?? null);
 
-        return () => {
-          subscription.unsubscribe();
-        };
+        return subscription; // Retourner la subscription directement
       } catch (error) {
         console.error("Erreur d'authentification:", error);
         toast({
@@ -50,14 +48,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           description: "Impossible de récupérer votre session",
           variant: "destructive",
         });
+        return undefined;
       } finally {
         setLoading(false);
       }
     };
 
-    const unsub = getInitialSession();
+    const init = async () => {
+      const subscription = await getInitialSession();
+      return () => {
+        if (subscription) subscription.unsubscribe();
+      };
+    };
+
+    const unsubscribe = init();
     return () => {
-      if (typeof unsub === "function") unsub();
+      unsubscribe.then((unsub) => {
+        if (typeof unsub === "function") unsub();
+      });
     };
   }, [toast]);
 
