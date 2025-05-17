@@ -37,7 +37,7 @@ export function StatCard({
           Clics: <span className="font-semibold">{impressions.toLocaleString()}</span>
         </div>}
 
-      {description && <div className="text-sm text-gray-700">{description}</div>}
+      {description}
 
       {percentage && <div className={cn("flex items-center text-sm mt-2", isNegative ? "text-red-500" : "text-green-500")}>
           {isNegative ? <ArrowDown className="h-4 w-4 mr-1" /> : <ArrowUp className="h-4 w-4 mr-1" />}
