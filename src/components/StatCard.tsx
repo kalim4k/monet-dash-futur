@@ -44,7 +44,7 @@ export function StatCard({
       
       {impressions && (
         <div className="text-sm text-gray-700 mb-2">
-          Impression: <span className="font-semibold">{impressions.toLocaleString()}</span>
+          Clics: <span className="font-semibold">{impressions.toLocaleString()}</span>
         </div>
       )}
 

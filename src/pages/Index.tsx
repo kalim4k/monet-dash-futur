@@ -38,7 +38,7 @@ const Index = () => {
             <h2 className="text-xl font-semibold mb-4">Résumé des Gains</h2>
             <div className="grid gap-4 grid-cols-2 sm:grid-cols-2">
               <StatCard
-                title="Today so far"
+                title="Gains Totaux"
                 value="4.080 FCFA"
                 impressions={4212}
                 description="vs Yesterday"
@@ -47,7 +47,7 @@ const Index = () => {
                 color="pink"
               />
               <StatCard
-                title="Yesterday"
+                title="Gains de la semaine"
                 value="8.406 FCFA"
                 impressions={10773}
                 description="vs Previous day"
@@ -56,7 +56,7 @@ const Index = () => {
                 color="blue"
               />
               <StatCard
-                title="This payment circle"
+                title="Clics totaux générés"
                 value="12.486 FCFA"
                 impressions={14985}
                 description="vs Last payment circle"
@@ -65,7 +65,7 @@ const Index = () => {
                 color="green"
               />
               <StatCard
-                title="This month so far"
+                title="Bonus Reçus"
                 value="136.025 FCFA"
                 impressions={236650}
                 description="vs Last month"
