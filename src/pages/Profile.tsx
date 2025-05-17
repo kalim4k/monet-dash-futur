@@ -1,9 +1,8 @@
 
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { UserProfileCard } from "@/components/UserProfileCard";
+import { PlatformsCarousel } from "@/components/PlatformsCarousel";
 
 const Profile = () => {
   return (
@@ -21,19 +20,10 @@ const Profile = () => {
                 </p>
               </div>
               
-              <Card className="bg-gradient-to-r from-primary/30 to-secondary/20 border-0 p-2 flex items-center gap-3">
-                <Avatar className="h-10 w-10 border-2 border-white/30">
-                  <AvatarImage src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=200&h=200" />
-                  <AvatarFallback className="bg-primary/20 text-primary">
-                    <User size={18} />
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium text-sm">Emma Dupont</p>
-                  <p className="text-xs text-muted-foreground">Influenceur Premium</p>
-                </div>
-              </Card>
+              <UserProfileCard />
             </div>
+            
+            <PlatformsCarousel />
           </header>
           
           <div className="border p-4 sm:p-6 rounded-lg shadow-sm bg-white">
