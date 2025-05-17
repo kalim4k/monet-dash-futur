@@ -36,28 +36,42 @@ const Index = () => {
           
           <section>
             <h2 className="text-xl font-semibold mb-4">Résumé des Gains</h2>
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
               <StatCard
-                title="Gains Totaux"
-                value="1,248,750 FCFA"
-                icon={<TrendingUp className="h-4 w-4" />}
-                className="bg-gradient-to-br from-primary/10 to-primary/5"
+                title="Today so far"
+                value="$4.080"
+                impressions={4212}
+                description="vs Yesterday"
+                percentage={-51.46}
+                comparedTo="$8.406"
+                color="pink"
               />
               <StatCard
-                title="Gains cette semaine"
-                value="324,000 FCFA"
-                description="+12% par rapport à la semaine précédente"
-                icon={<ChevronUp className="h-4 w-4" />}
+                title="Yesterday"
+                value="$8.406"
+                impressions={10773}
+                description="vs Previous day"
+                percentage={-2.76}
+                comparedTo="$8.645"
+                color="blue"
               />
               <StatCard
-                title="Clics Générés"
-                value="14,820"
-                icon={<MousePointer className="h-4 w-4" />}
+                title="This payment circle"
+                value="$12.486"
+                impressions={14985}
+                description="vs Last payment circle"
+                percentage={-89.89}
+                comparedTo="$123.539"
+                color="green"
               />
               <StatCard
-                title="Bonus Reçus"
-                value="75,000 FCFA"
-                icon={<Award className="h-4 w-4" />}
+                title="This month so far"
+                value="$136.025"
+                impressions={236650}
+                description="vs Last month"
+                percentage={-62.53}
+                comparedTo="$363.023"
+                color="yellow"
               />
             </div>
           </section>
