@@ -12,14 +12,14 @@ const Index = () => {
     <div className="flex min-h-screen bg-[#f8fafc]">
       <Sidebar />
       
-      <main className="flex-1 pb-16 md:pb-0">
-        <div className="container max-w-7xl py-6">
+      <main className="flex-1 pb-16 md:pb-0 w-full">
+        <div className="container px-4 sm:px-6 max-w-7xl py-6">
           <header className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight">Tableau de bord</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Tableau de bord</h1>
             <p className="text-muted-foreground mt-1">
               Bienvenue sur votre tableau de bord de monétisation de vos réseaux sociaux
             </p>
-            <div className="flex space-x-3 mt-2">
+            <div className="flex flex-wrap gap-3 mt-2">
               <Facebook size={20} className="text-[#1877F2]" />
               <Instagram size={20} className="text-[#E4405F]" />
               <Twitter size={20} className="text-[#1DA1F2]" />
