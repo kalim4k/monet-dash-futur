@@ -40,7 +40,7 @@ export function UserProfileCard() {
             <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></div>
           </div>
           
-          <div className={`${isMobile ? "hidden" : "block"} z-10`}>
+          <div className="z-10">
             <p className="font-medium text-sm">Emma Dupont</p>
             <p className="text-xs text-muted-foreground">Influenceur Premium</p>
           </div>
