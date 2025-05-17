@@ -4,13 +4,13 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 // Sample data - in a real app, this would come from an API
 const data = [
-  { name: "Lun", earnings: 24000 },
-  { name: "Mar", earnings: 32000 },
-  { name: "Mer", earnings: 28000 },
-  { name: "Jeu", earnings: 42000 },
-  { name: "Ven", earnings: 54000 },
-  { name: "Sam", earnings: 68000 },
-  { name: "Dim", earnings: 76000 },
+  { name: "Lun", earnings: 500 },
+  { name: "Mar", earnings: 950 },
+  { name: "Mer", earnings: 1200 },
+  { name: "Jeu", earnings: 1750 },
+  { name: "Ven", earnings: 2100 },
+  { name: "Sam", earnings: 2500 },
+  { name: "Dim", earnings: 3000 },
 ];
 
 const formatNumber = (number: number) => {
@@ -34,12 +34,12 @@ export function WeeklyEarnings() {
               tick={{ fontSize: 12 }} 
             />
             <YAxis 
-              tickFormatter={(value) => `${value / 700} FCFA`}
+              tickFormatter={(value) => `${value} FCFA`}
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12 }}
-              ticks={[0, 700, 1400, 2100, 2800, 3500, 4200, 4900, 5600, 6300, 7000]}
-              domain={[0, 7000]}
+              ticks={[0, 500, 1000, 1500, 2000, 2500, 3000]}
+              domain={[0, 3000]}
             />
             <Tooltip 
               formatter={(value: number) => [`${formatNumber(value)} FCFA`, "Gains"]} 
