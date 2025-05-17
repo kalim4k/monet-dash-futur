@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label } from "recharts";
 
 // Sample data - in a real app, this would come from an API
 const data = [
@@ -18,6 +18,8 @@ const formatNumber = (number: number) => {
 };
 
 export function WeeklyEarnings() {
+  const yAxisTicks = [0, 700, 1400, 2100, 2800];
+  
   return (
     <Card className="col-span-full md:col-span-2">
       <CardHeader>
@@ -25,20 +27,28 @@ export function WeeklyEarnings() {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+          <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 25 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
             <XAxis 
               dataKey="name" 
               axisLine={false} 
               tickLine={false}
-              tick={{ fontSize: 12 }} 
-            />
+              tick={{ fontSize: 12 }}
+              height={50}
+            >
+              <Label 
+                value="Jours de la semaine" 
+                offset={-10} 
+                position="insideBottom"
+              />
+            </XAxis>
             <YAxis 
               tickFormatter={(value) => `${value} FCFA`} 
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12 }}
-              domain={[0, 700]}
+              domain={[0, 2800]}
+              ticks={yAxisTicks}
             />
             <Tooltip 
               formatter={(value: number) => [`${formatNumber(value)} FCFA`, "Gains"]} 
@@ -59,7 +69,14 @@ export function WeeklyEarnings() {
               strokeWidth={2}
               dot={{ strokeWidth: 2, r: 4, fill: "#fff" }}
               fillOpacity={1} 
-              fill="url(#colorEarnings)" 
+              fill="url(#colorEarnings)"
+              label={{
+                position: 'bottom',
+                offset: 15,
+                fill: 'hsl(var(--foreground))',
+                fontSize: 10,
+                formatter: (value: any) => `${value} FCFA`,
+              }}
             />
           </LineChart>
         </ResponsiveContainer>
