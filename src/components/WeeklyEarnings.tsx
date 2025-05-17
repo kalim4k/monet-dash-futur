@@ -25,7 +25,7 @@ export function WeeklyEarnings() {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+          <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
             <XAxis 
               dataKey="name" 
@@ -34,10 +34,12 @@ export function WeeklyEarnings() {
               tick={{ fontSize: 12 }} 
             />
             <YAxis 
-              tickFormatter={(value) => `${value / 1000}k`} 
+              tickFormatter={(value) => `${value / 700} FCFA`}
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12 }}
+              ticks={[0, 700, 1400, 2100, 2800, 3500, 4200, 4900, 5600, 6300, 7000]}
+              domain={[0, 7000]}
             />
             <Tooltip 
               formatter={(value: number) => [`${formatNumber(value)} FCFA`, "Gains"]} 
