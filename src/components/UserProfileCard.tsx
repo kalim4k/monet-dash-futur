@@ -1,14 +1,21 @@
 
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
+import { Link } from "react-router-dom";
 
 export function UserProfileCard() {
   const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  
+  // Extraire le nom d'utilisateur et l'avatar de l'utilisateur
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Utilisateur';
+  const avatarUrl = user?.user_metadata?.avatar_url;
 
   return (
     <Card className={`
@@ -31,7 +38,7 @@ export function UserProfileCard() {
               transition-transform duration-300
               ${isMenuOpen ? "scale-105" : ""}
             `}>
-              <AvatarImage src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=200&h=200" />
+              <AvatarImage src={avatarUrl} />
               <AvatarFallback className="bg-primary/20 text-primary">
                 <User size={isMobile ? 18 : 24} />
               </AvatarFallback>
@@ -41,26 +48,34 @@ export function UserProfileCard() {
           </div>
           
           <div className="z-10">
-            <p className="font-medium text-sm">Emma Dupont</p>
+            <p className="font-medium text-sm">{displayName}</p>
             <p className="text-xs text-muted-foreground">Influenceur Premium</p>
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 p-2 bg-white/90 backdrop-blur-md">
           <div className="flex items-center gap-3 p-2 border-b mb-1">
             <Avatar className="h-10 w-10 border-2 border-primary/20">
-              <AvatarImage src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=200&h=200" />
+              <AvatarImage src={avatarUrl} />
               <AvatarFallback className="bg-primary/20 text-primary">
                 <User size={18} />
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-medium text-sm">Emma Dupont</p>
+              <p className="font-medium text-sm">{displayName}</p>
               <p className="text-xs text-primary">Influenceur Premium</p>
             </div>
           </div>
-          <DropdownMenuItem className="cursor-pointer">Mon profil</DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer" asChild>
+            <Link to="/profile">Mon profil</Link>
+          </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer">Paramètres</DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer text-red-500">Déconnexion</DropdownMenuItem>
+          <DropdownMenuItem 
+            className="cursor-pointer text-red-500 flex items-center" 
+            onClick={() => signOut()}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Déconnexion
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </Card>
