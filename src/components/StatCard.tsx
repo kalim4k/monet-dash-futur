@@ -31,11 +31,10 @@ export function StatCard({
     yellow: "bg-yellow-50"
   };
   
-  // Only show impressions if greater than 0
+  // Don't show any stats if they are zero or undefined
   const showImpressions = impressions && impressions > 0;
-  
-  // Only show percentage if it's not 0
   const showPercentage = percentage !== undefined && percentage !== 0;
+  const showComparedTo = comparedTo && showPercentage;
   
   return <div className={cn("relative rounded-3xl p-6 shadow-sm", colorClasses[color], className)}>
       <h3 className="text-base font-medium mb-2">{title}</h3>
@@ -49,7 +48,7 @@ export function StatCard({
 
       {showPercentage && <div className={cn("flex items-center text-sm mt-2", isNegative ? "text-red-500" : "text-green-500")}>
           {isNegative ? <ArrowDown className="h-4 w-4 mr-1" /> : <ArrowUp className="h-4 w-4 mr-1" />}
-          <span>{Math.abs(percentage).toFixed(2)}% {comparedTo && `(${comparedTo})`}</span>
+          <span>{Math.abs(percentage).toFixed(2)}% {showComparedTo && `(${comparedTo})`}</span>
         </div>}
       
       <div className="absolute bottom-4 right-4">

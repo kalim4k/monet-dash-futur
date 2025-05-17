@@ -1,4 +1,3 @@
-
 import { ArrowUpRight, ChevronUp, Award, MousePointer, TrendingUp, User } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ClicksPerProductChart } from "@/components/ClicksPerProductChart";
@@ -45,33 +44,21 @@ const Index = () => {
               <StatCard
                 title="Gains Totaux"
                 value="0 FCFA"
-                impressions={0}
-                percentage={0}
-                comparedTo="0 FCFA"
                 color="pink"
               />
               <StatCard
                 title="Gains de la semaine"
                 value="0 FCFA"
-                impressions={0}
-                percentage={0}
-                comparedTo="0 FCFA"
                 color="blue"
               />
               <StatCard
                 title="Clics totaux générés"
                 value="0 FCFA"
-                impressions={0}
-                percentage={0}
-                comparedTo="0 FCFA"
                 color="green"
               />
               <StatCard
                 title="Bonus Reçus"
                 value="0 FCFA"
-                impressions={0}
-                percentage={0}
-                comparedTo="0 FCFA"
                 color="yellow"
               />
             </div>
