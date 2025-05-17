@@ -28,7 +28,9 @@ export const generateMockPaymentHistory = (count = 5) => {
     date: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000),
     amount: Math.floor(Math.random() * 900000) + 50000,
     method: methods[Math.floor(Math.random() * methods.length)],
-    account: [`+237 655 123 456`, `+237 677 987 654`, `emma.dupont@example.com`][Math.floor(Math.random() * 3)],
+    account: methods[Math.floor(Math.random() * methods.length)] === "paypal" 
+      ? "emma.dupont@example.com" 
+      : `+237 ${Math.floor(Math.random() * 2) === 0 ? '655' : '677'} ${Math.random().toString().substring(2, 5)} ${Math.random().toString().substring(2, 5)}`,
     status: statuses[Math.floor(Math.random() * statuses.length)]
   }));
 };
@@ -37,21 +39,21 @@ export const generateMockPaymentMethods = () => {
   return [
     {
       id: "momo-1",
-      type: "momo",
+      type: "momo" as const,
       accounts: [
         { id: "momo-acc-1", type: "momo", number: "+237 655 123 456", name: "Emma Dupont" }
       ]
     },
     {
       id: "orange-1",
-      type: "orange",
+      type: "orange" as const,
       accounts: [
         { id: "orange-acc-1", type: "orange", number: "+237 677 987 654", name: "Emma Dupont" }
       ]
     },
     {
       id: "paypal-1",
-      type: "paypal",
+      type: "paypal" as const,
       accounts: [
         { id: "paypal-acc-1", type: "paypal", number: "emma.dupont@example.com", name: "Emma Dupont" }
       ]

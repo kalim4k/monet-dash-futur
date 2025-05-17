@@ -12,8 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const History = () => {
-  // Mock data
-  const [balance, setBalance] = useState<number>(750000);
+  // Mock data - Use total earnings value (4,080 FCFA) from home page
+  const [balance, setBalance] = useState<number>(4080);
   const [transactions, setTransactions] = useState<PaymentHistoryItem[]>(generateMockPaymentHistory(5));
   const savedPaymentMethods = generateMockPaymentMethods();
   
@@ -24,7 +24,7 @@ const History = () => {
       id: `tx-${Date.now()}`,
       date: new Date(),
       amount: data.amount,
-      method: data.method,
+      method: data.method as "momo" | "orange" | "paypal",
       account: savedPaymentMethods
         .find(m => m.type === data.method)?.accounts
         .find(a => a.id === data.account)?.number || "",
@@ -40,7 +40,7 @@ const History = () => {
     <div className="flex min-h-screen bg-[#f8fafc]">
       <Sidebar />
       
-      <main className="flex-1 pb-16 md:pb-0 w-full">
+      <main className="flex-1 pb-16 md:pb-0 w-full overflow-x-hidden">
         <div className="container px-4 sm:px-6 max-w-7xl py-6">
           <header className="mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">

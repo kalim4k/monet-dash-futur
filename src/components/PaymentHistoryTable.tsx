@@ -84,61 +84,63 @@ export function PaymentHistoryTable({ transactions }: PaymentHistoryTableProps) 
 
   return (
     <div className="rounded-lg border shadow-sm overflow-hidden bg-white">
-      <Table>
-        <TableCaption>Historique des retraits récents</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[180px]">Date</TableHead>
-            <TableHead>Montant</TableHead>
-            <TableHead>Méthode</TableHead>
-            <TableHead className="hidden md:table-cell">Compte</TableHead>
-            <TableHead>Statut</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {transactions.length === 0 ? (
+      <div className="overflow-x-auto">
+        <Table>
+          <TableCaption>Historique des retraits récents</TableCaption>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                Aucun historique de retrait disponible
-              </TableCell>
+              <TableHead className="w-[100px] md:w-[180px]">Date</TableHead>
+              <TableHead>Montant</TableHead>
+              <TableHead className="w-[80px] sm:w-auto">Méthode</TableHead>
+              <TableHead className="hidden md:table-cell">Compte</TableHead>
+              <TableHead className="w-[90px] md:w-auto">Statut</TableHead>
             </TableRow>
-          ) : (
-            transactions.map((transaction) => {
-              const methodInfo = getMethodInfo(transaction.method);
-              const statusBadge = getStatusBadge(transaction.status);
-              
-              return (
-                <TableRow key={transaction.id}>
-                  <TableCell className="font-medium">
-                    {formatDate(transaction.date)}
-                  </TableCell>
-                  <TableCell className="font-semibold">
-                    {formatCurrency(transaction.amount)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className={`h-6 w-6 rounded-md ${methodInfo.color} flex items-center justify-center ${methodInfo.textColor}`}>
-                        {methodInfo.icon}
+          </TableHeader>
+          <TableBody>
+            {transactions.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  Aucun historique de retrait disponible
+                </TableCell>
+              </TableRow>
+            ) : (
+              transactions.map((transaction) => {
+                const methodInfo = getMethodInfo(transaction.method);
+                const statusBadge = getStatusBadge(transaction.status);
+                
+                return (
+                  <TableRow key={transaction.id}>
+                    <TableCell className="font-medium text-xs sm:text-sm">
+                      {formatDate(transaction.date)}
+                    </TableCell>
+                    <TableCell className="font-semibold text-xs sm:text-sm">
+                      {formatCurrency(transaction.amount)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <div className={`h-5 w-5 sm:h-6 sm:w-6 rounded-md ${methodInfo.color} flex items-center justify-center ${methodInfo.textColor}`}>
+                          {methodInfo.icon}
+                        </div>
+                        <span className="hidden sm:inline text-xs sm:text-sm">{methodInfo.name}</span>
                       </div>
-                      <span className="hidden sm:inline">{methodInfo.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-muted-foreground">
-                    {transaction.account}
-                  </TableCell>
-                  <TableCell>
-                    <span className={`inline-flex items-center rounded-full border px-2 py-1 text-xs font-semibold ${statusBadge}`}>
-                      {transaction.status === "completed" && "Terminé"}
-                      {transaction.status === "pending" && "En attente"}
-                      {transaction.status === "failed" && "Échoué"}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              );
-            })
-          )}
-        </TableBody>
-      </Table>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-muted-foreground text-xs sm:text-sm">
+                      {transaction.account}
+                    </TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center rounded-full border px-1.5 py-0.5 sm:px-2 sm:py-1 text-xs font-semibold ${statusBadge}`}>
+                        {transaction.status === "completed" && "Terminé"}
+                        {transaction.status === "pending" && "En attente"}
+                        {transaction.status === "failed" && "Échoué"}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
-}
+};
