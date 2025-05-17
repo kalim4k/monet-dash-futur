@@ -46,7 +46,6 @@ const Index = () => {
                 title="Gains Totaux"
                 value="0 FCFA"
                 impressions={0}
-                description="vs Yesterday"
                 percentage={0}
                 comparedTo="0 FCFA"
                 color="pink"
@@ -55,7 +54,6 @@ const Index = () => {
                 title="Gains de la semaine"
                 value="0 FCFA"
                 impressions={0}
-                description="vs Previous day"
                 percentage={0}
                 comparedTo="0 FCFA"
                 color="blue"
@@ -64,7 +62,6 @@ const Index = () => {
                 title="Clics totaux générés"
                 value="0 FCFA"
                 impressions={0}
-                description="vs Last payment circle"
                 percentage={0}
                 comparedTo="0 FCFA"
                 color="green"
@@ -73,7 +70,6 @@ const Index = () => {
                 title="Bonus Reçus"
                 value="0 FCFA"
                 impressions={0}
-                description="vs Last month"
                 percentage={0}
                 comparedTo="0 FCFA"
                 color="yellow"
