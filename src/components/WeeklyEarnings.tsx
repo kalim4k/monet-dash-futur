@@ -1,16 +1,16 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 // Sample data - in a real app, this would come from an API
 const data = [
-  { name: "Lun", earnings: 240 },
-  { name: "Mar", earnings: 320 },
-  { name: "Mer", earnings: 280 },
-  { name: "Jeu", earnings: 420 },
-  { name: "Ven", earnings: 540 },
-  { name: "Sam", earnings: 680 },
-  { name: "Dim", earnings: 700 },
+  { name: "Lun", earnings: 24000 },
+  { name: "Mar", earnings: 32000 },
+  { name: "Mer", earnings: 28000 },
+  { name: "Jeu", earnings: 42000 },
+  { name: "Ven", earnings: 54000 },
+  { name: "Sam", earnings: 68000 },
+  { name: "Dim", earnings: 76000 },
 ];
 
 const formatNumber = (number: number) => {
@@ -18,8 +18,6 @@ const formatNumber = (number: number) => {
 };
 
 export function WeeklyEarnings() {
-  const yAxisTicks = [0, 700, 1400, 2100, 2800];
-  
   return (
     <Card className="col-span-full md:col-span-2">
       <CardHeader>
@@ -27,37 +25,23 @@ export function WeeklyEarnings() {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 25 }}>
+          <LineChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
             <XAxis 
               dataKey="name" 
               axisLine={false} 
               tickLine={false}
-              tick={{ fontSize: 12 }}
-              height={50}
-            >
-              <Label 
-                value="Jours de la semaine" 
-                offset={-10} 
-                position="insideBottom"
-              />
-            </XAxis>
+              tick={{ fontSize: 12 }} 
+            />
             <YAxis 
-              tickFormatter={(value) => `${value} FCFA`} 
+              tickFormatter={(value) => `${value / 1000}k`} 
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12 }}
-              domain={[0, 2800]}
-              ticks={yAxisTicks}
             />
             <Tooltip 
               formatter={(value: number) => [`${formatNumber(value)} FCFA`, "Gains"]} 
               contentStyle={{ borderRadius: "0.5rem", borderColor: "#e2e8f0" }}
-            />
-            <Legend 
-              verticalAlign="bottom"
-              height={36}
-              formatter={(value) => `Gains journaliers (FCFA)`}
             />
             <defs>
               <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
@@ -74,7 +58,7 @@ export function WeeklyEarnings() {
               strokeWidth={2}
               dot={{ strokeWidth: 2, r: 4, fill: "#fff" }}
               fillOpacity={1} 
-              fill="url(#colorEarnings)"
+              fill="url(#colorEarnings)" 
             />
           </LineChart>
         </ResponsiveContainer>
