@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label, Legend } from "recharts";
 
 // Sample data - in a real app, this would come from an API
 const data = [
@@ -54,6 +54,11 @@ export function WeeklyEarnings() {
               formatter={(value: number) => [`${formatNumber(value)} FCFA`, "Gains"]} 
               contentStyle={{ borderRadius: "0.5rem", borderColor: "#e2e8f0" }}
             />
+            <Legend 
+              verticalAlign="bottom"
+              height={36}
+              formatter={(value) => `Gains journaliers (FCFA)`}
+            />
             <defs>
               <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
@@ -70,13 +75,6 @@ export function WeeklyEarnings() {
               dot={{ strokeWidth: 2, r: 4, fill: "#fff" }}
               fillOpacity={1} 
               fill="url(#colorEarnings)"
-              label={{
-                position: 'bottom',
-                offset: 15,
-                fill: 'hsl(var(--foreground))',
-                fontSize: 10,
-                formatter: (value: any) => `${value} FCFA`,
-              }}
             />
           </LineChart>
         </ResponsiveContainer>
