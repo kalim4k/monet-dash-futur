@@ -36,41 +36,41 @@ const Index = () => {
           
           <section>
             <h2 className="text-xl font-semibold mb-4">Résumé des Gains</h2>
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+            <div className="grid gap-4 grid-cols-2 sm:grid-cols-2">
               <StatCard
                 title="Today so far"
-                value="$4.080"
+                value="4.080 FCFA"
                 impressions={4212}
                 description="vs Yesterday"
                 percentage={-51.46}
-                comparedTo="$8.406"
+                comparedTo="8.406 FCFA"
                 color="pink"
               />
               <StatCard
                 title="Yesterday"
-                value="$8.406"
+                value="8.406 FCFA"
                 impressions={10773}
                 description="vs Previous day"
                 percentage={-2.76}
-                comparedTo="$8.645"
+                comparedTo="8.645 FCFA"
                 color="blue"
               />
               <StatCard
                 title="This payment circle"
-                value="$12.486"
+                value="12.486 FCFA"
                 impressions={14985}
                 description="vs Last payment circle"
                 percentage={-89.89}
-                comparedTo="$123.539"
+                comparedTo="123.539 FCFA"
                 color="green"
               />
               <StatCard
                 title="This month so far"
-                value="$136.025"
+                value="136.025 FCFA"
                 impressions={236650}
                 description="vs Last month"
                 percentage={-62.53}
-                comparedTo="$363.023"
+                comparedTo="363.023 FCFA"
                 color="yellow"
               />
             </div>
