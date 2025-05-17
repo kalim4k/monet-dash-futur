@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -9,6 +10,7 @@ import { generateMockPaymentHistory, generateMockPaymentMethods } from "@/lib/ut
 import { Wallet, FileText, Plus } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 const History = () => {
   // Mock data - Use total earnings value (4,080 FCFA) from home page
   const [balance, setBalance] = useState<number>(4080);
@@ -31,12 +33,13 @@ const History = () => {
     setTransactions([newTransaction, ...transactions]);
     setBalance(prev => prev - data.amount);
   };
-  return <div className="flex min-h-screen bg-[#f8fafc]">
+
+  return (
+    <div className="flex min-h-screen bg-[#f8fafc] overflow-x-hidden">
       <Sidebar />
       
       <main className="flex-1 pb-16 md:pb-0 w-full overflow-x-hidden">
         <div className="container px-4 sm:px-6 max-w-7xl py-6">
-          
           
           <div className="grid gap-6 md:grid-cols-12">
             {/* Balance Card */}
@@ -51,10 +54,10 @@ const History = () => {
               <CardContent>
                 <div className="text-3xl font-bold">
                   {new Intl.NumberFormat("fr-FR", {
-                  style: "currency",
-                  currency: "XAF",
-                  minimumFractionDigits: 0
-                }).format(balance)}
+                    style: "currency",
+                    currency: "XAF",
+                    minimumFractionDigits: 0
+                  }).format(balance)}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
                   Minimum de retrait: 50,000 FCFA
@@ -76,7 +79,7 @@ const History = () => {
                   </TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="history">
+                <TabsContent value="history" className="overflow-hidden">
                   <PaymentHistoryTable transactions={transactions} />
                 </TabsContent>
                 
@@ -90,6 +93,8 @@ const History = () => {
       </main>
       
       <BottomNavigation />
-    </div>;
+    </div>
+  );
 };
+
 export default History;
