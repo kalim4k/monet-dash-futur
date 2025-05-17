@@ -1,3 +1,4 @@
+
 import { ArrowDown, ArrowRight, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 interface StatCardProps {
@@ -29,11 +30,15 @@ export function StatCard({
     green: "bg-green-50",
     yellow: "bg-yellow-50"
   };
+  
+  // Only show impressions if greater than 0
+  const showImpressions = impressions && impressions > 0;
+  
   return <div className={cn("relative rounded-3xl p-6 shadow-sm", colorClasses[color], className)}>
       <h3 className="text-base font-medium mb-2">{title}</h3>
       <p className="text-3xl font-bold mb-2">{value}</p>
       
-      {impressions && <div className="text-sm text-gray-700 mb-2">
+      {showImpressions && <div className="text-sm text-gray-700 mb-2">
           Clics: <span className="font-semibold">{impressions.toLocaleString()}</span>
         </div>}
 
