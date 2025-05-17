@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowUpRight } from "lucide-react";
 
 // Enhanced data with revenue information
@@ -18,49 +18,38 @@ export function ClicksPerProductChart() {
       <CardHeader>
         <CardTitle>Aperçu des Produits</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {data.map((product, index) => (
-          <div key={product.name}>
-            <div className="flex items-start justify-between mb-2">
-              <div>
-                <h3 className="text-lg font-semibold">{product.name}</h3>
-                <div className="flex items-center mt-1 space-x-4">
-                  <div className="flex items-center space-x-1.5">
-                    <div className="w-2 h-2 rounded-full bg-primary"></div>
-                    <span className="text-sm text-muted-foreground">
-                      {product.clicks.toLocaleString()} clics
-                    </span>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Produit</TableHead>
+              <TableHead className="text-right">Clics</TableHead>
+              <TableHead className="text-right">Revenus (FCFA)</TableHead>
+              <TableHead className="text-right w-16">Tendance</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((product, index) => (
+              <TableRow key={product.name}>
+                <TableCell className="font-medium">{product.name}</TableCell>
+                <TableCell className="text-right">{product.clicks.toLocaleString()}</TableCell>
+                <TableCell className="text-right">{product.revenue.toLocaleString()}</TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end">
+                    <div className="bg-gradient-to-br from-primary/10 to-secondary/10 p-1.5 rounded-lg flex items-center justify-center">
+                      <ArrowUpRight 
+                        size={16} 
+                        className={`text-primary ${
+                          index % 2 === 0 ? "rotate-45" : ""
+                        }`} 
+                      />
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-1.5">
-                    <div className="w-2 h-2 rounded-full bg-secondary"></div>
-                    <span className="text-sm text-muted-foreground">
-                      {product.revenue.toLocaleString()} FCFA
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gradient-to-br from-primary/10 to-secondary/10 p-2 rounded-xl flex items-center justify-center">
-                <ArrowUpRight 
-                  size={18} 
-                  className={`text-primary ${
-                    index % 2 === 0 ? "rotate-45" : ""
-                  }`} 
-                />
-              </div>
-            </div>
-            
-            <div className="h-2 bg-muted rounded-full overflow-hidden mt-3">
-              <div
-                className="h-full bg-gradient-to-r from-primary to-secondary" 
-                style={{ width: `${(product.clicks / 310) * 100}%` }}
-              />
-            </div>
-            
-            {index < data.length - 1 && (
-              <Separator className="mt-6 mb-0" />
-            )}
-          </div>
-        ))}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );
