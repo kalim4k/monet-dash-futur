@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -10,13 +9,12 @@ import { generateMockPaymentHistory, generateMockPaymentMethods } from "@/lib/ut
 import { Wallet, FileText, Plus } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 const History = () => {
   // Mock data - Use total earnings value (4,080 FCFA) from home page
   const [balance, setBalance] = useState<number>(4080);
   const [transactions, setTransactions] = useState<PaymentHistoryItem[]>(generateMockPaymentHistory(5));
   const savedPaymentMethods = generateMockPaymentMethods();
-  
+
   // Handle withdrawal submission
   const handleWithdrawal = (data: any) => {
     // Create a new transaction
@@ -25,37 +23,20 @@ const History = () => {
       date: new Date(),
       amount: data.amount,
       method: data.method as "momo" | "orange" | "paypal",
-      account: savedPaymentMethods
-        .find(m => m.type === data.method)?.accounts
-        .find(a => a.id === data.account)?.number || "",
+      account: savedPaymentMethods.find(m => m.type === data.method)?.accounts.find(a => a.id === data.account)?.number || "",
       status: "pending"
     };
-    
+
     // Update transactions and balance
     setTransactions([newTransaction, ...transactions]);
     setBalance(prev => prev - data.amount);
   };
-
-  return (
-    <div className="flex min-h-screen bg-[#f8fafc]">
+  return <div className="flex min-h-screen bg-[#f8fafc]">
       <Sidebar />
       
       <main className="flex-1 pb-16 md:pb-0 w-full overflow-x-hidden">
         <div className="container px-4 sm:px-6 max-w-7xl py-6">
-          <header className="mb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Historique de Paiement</h1>
-                <p className="text-muted-foreground mt-1">
-                  Consultez l'historique de vos paiements et transactions
-                </p>
-              </div>
-              
-              <UserProfileCard />
-            </div>
-            
-            <PlatformsCarousel />
-          </header>
+          
           
           <div className="grid gap-6 md:grid-cols-12">
             {/* Balance Card */}
@@ -70,10 +51,10 @@ const History = () => {
               <CardContent>
                 <div className="text-3xl font-bold">
                   {new Intl.NumberFormat("fr-FR", {
-                    style: "currency",
-                    currency: "XAF",
-                    minimumFractionDigits: 0,
-                  }).format(balance)}
+                  style: "currency",
+                  currency: "XAF",
+                  minimumFractionDigits: 0
+                }).format(balance)}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
                   Minimum de retrait: 50,000 FCFA
@@ -100,11 +81,7 @@ const History = () => {
                 </TabsContent>
                 
                 <TabsContent value="withdraw">
-                  <WithdrawalForm
-                    balance={balance}
-                    savedMethods={savedPaymentMethods}
-                    onSubmit={handleWithdrawal}
-                  />
+                  <WithdrawalForm balance={balance} savedMethods={savedPaymentMethods} onSubmit={handleWithdrawal} />
                 </TabsContent>
               </Tabs>
             </div>
@@ -113,8 +90,6 @@ const History = () => {
       </main>
       
       <BottomNavigation />
-    </div>
-  );
+    </div>;
 };
-
 export default History;
