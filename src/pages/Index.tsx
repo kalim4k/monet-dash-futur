@@ -1,3 +1,4 @@
+
 import { ArrowUpRight, ChevronUp, Award, MousePointer, TrendingUp, User } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ClicksPerProductChart } from "@/components/ClicksPerProductChart";
@@ -11,9 +12,72 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { PlatformsCarousel } from "@/components/PlatformsCarousel";
 import { UserProfileCard } from "@/components/UserProfileCard";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 
 const Index = () => {
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  const [earnings, setEarnings] = useState({ total: 0, weekly: 0, clicks: 0, bonus: 0 });
+  
+  // Fonction pour charger les statistiques de l'utilisateur
+  const loadUserStats = async (userId: string) => {
+    try {
+      // Récupérer les revenus totaux (1 FCFA par clic)
+      const { data: totalEarnings, error: totalError } = await supabase.rpc(
+        'get_affiliate_earnings', 
+        { user_id: userId }
+      );
+      
+      // Récupérer les revenus hebdomadaires (1 FCFA par clic)
+      const { data: weeklyEarnings, error: weeklyError } = await supabase.rpc(
+        'get_affiliate_weekly_earnings',
+        { user_id: userId }
+      );
+      
+      // Récupérer le nombre total de clics
+      const { data: clicksData, error: clicksError } = await supabase
+        .from('affiliate_links')
+        .select('id')
+        .eq('user_id', userId)
+        .then(async ({ data, error }) => {
+          if (error) throw error;
+          if (!data || data.length === 0) return { data: 0, error: null };
+          
+          const linkIds = data.map(link => link.id);
+          const { count, error: countError } = await supabase
+            .from('clicks')
+            .select('*', { count: 'exact', head: true })
+            .in('affiliate_link_id', linkIds);
+            
+          return { data: count || 0, error: countError };
+        });
+      
+      if (totalError || weeklyError || clicksError) {
+        throw new Error("Erreur lors du chargement des statistiques");
+      }
+      
+      setEarnings({
+        // 1 FCFA par clic
+        total: totalEarnings || 0, 
+        weekly: weeklyEarnings || 0,
+        clicks: clicksData || 0,
+        bonus: 0 // Pour le moment, pas de système de bonus
+      });
+      
+    } catch (error) {
+      console.error("Erreur lors du chargement des statistiques:", error);
+    }
+  };
+  
+  // Charger les statistiques si l'utilisateur est connecté
+  useEffect(() => {
+    if (user?.id) {
+      loadUserStats(user.id);
+    }
+  }, [user]);
   
   return (
     <div className="flex min-h-screen bg-[#f8fafc]">
@@ -43,22 +107,23 @@ const Index = () => {
             <div className="grid gap-4 grid-cols-2 sm:grid-cols-2">
               <StatCard
                 title="Gains Totaux"
-                value="0 FCFA"
+                value={`${earnings.total} FCFA`}
+                description={`1 FCFA par clic généré`}
                 color="pink"
               />
               <StatCard
                 title="Gains de la semaine"
-                value="0 FCFA"
+                value={`${earnings.weekly} FCFA`}
                 color="blue"
               />
               <StatCard
                 title="Clics totaux générés"
-                value="0 FCFA"
+                value={earnings.clicks.toString()}
                 color="green"
               />
               <StatCard
                 title="Bonus Reçus"
-                value="0 FCFA"
+                value={`${earnings.bonus} FCFA`}
                 color="yellow"
               />
             </div>
