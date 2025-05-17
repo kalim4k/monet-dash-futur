@@ -1,29 +1,31 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowUpRight } from "lucide-react";
 
-// Enhanced data with revenue information
+// Enhanced data with zeroed values
 const data = [{
   name: "WhatsApp Pro",
-  clicks: 240,
-  revenue: 125000
+  clicks: 0,
+  revenue: 0
 }, {
   name: "Status Booster",
-  clicks: 180,
-  revenue: 98000
+  clicks: 0,
+  revenue: 0
 }, {
   name: "Contact Sync",
-  clicks: 120,
-  revenue: 65000
+  clicks: 0,
+  revenue: 0
 }, {
   name: "Media Tool",
-  clicks: 310,
-  revenue: 156000
+  clicks: 0,
+  revenue: 0
 }, {
   name: "Message Scheduler",
-  clicks: 280,
-  revenue: 143000
+  clicks: 0,
+  revenue: 0
 }];
+
 export function ClicksPerProductChart() {
   return <Card className="col-span-full">
       <CardHeader>
@@ -36,7 +38,6 @@ export function ClicksPerProductChart() {
               <TableHead>Produit</TableHead>
               <TableHead className="text-right">Clics</TableHead>
               <TableHead className="text-right">Revenus (FCFA)</TableHead>
-              
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -44,7 +45,6 @@ export function ClicksPerProductChart() {
                 <TableCell className="font-medium">{product.name}</TableCell>
                 <TableCell className="text-right">{product.clicks.toLocaleString()}</TableCell>
                 <TableCell className="text-right">{product.revenue.toLocaleString()}</TableCell>
-                
               </TableRow>)}
           </TableBody>
         </Table>

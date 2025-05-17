@@ -4,13 +4,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
-// Sample data - in a real app, this would come from an API
+// Sample data with zeroed earnings and clicks
 const affiliates = [
-  { id: 1, name: "Marie Diop", earnings: 245000, clicks: 1250, photo: null },
-  { id: 2, name: "Amadou Sow", earnings: 210000, clicks: 980, photo: null },
-  { id: 3, name: "Fatou Kane", earnings: 185000, clicks: 870, photo: null },
-  { id: 4, name: "Omar Ndiaye", earnings: 160000, clicks: 750, photo: null },
-  { id: 5, name: "Aïcha Ba", earnings: 130000, clicks: 620, photo: null },
+  { id: 1, name: "Marie Diop", earnings: 0, clicks: 0, photo: null },
+  { id: 2, name: "Amadou Sow", earnings: 0, clicks: 0, photo: null },
+  { id: 3, name: "Fatou Kane", earnings: 0, clicks: 0, photo: null },
+  { id: 4, name: "Omar Ndiaye", earnings: 0, clicks: 0, photo: null },
+  { id: 5, name: "Aïcha Ba", earnings: 0, clicks: 0, photo: null },
 ];
 
 export function TopAffiliatesTable() {

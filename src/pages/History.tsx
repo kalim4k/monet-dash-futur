@@ -12,9 +12,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const History = () => {
-  // Mock data - Use total earnings value (4,080 FCFA) from home page
-  const [balance, setBalance] = useState<number>(4080);
-  const [transactions, setTransactions] = useState<PaymentHistoryItem[]>(generateMockPaymentHistory(5));
+  // Initialiser le solde à zéro au lieu de 4080
+  const [balance, setBalance] = useState<number>(0);
+  // Tableau vide pour les transactions au lieu de générer des fausses
+  const [transactions, setTransactions] = useState<PaymentHistoryItem[]>([]);
   const savedPaymentMethods = generateMockPaymentMethods();
 
   // Handle withdrawal submission

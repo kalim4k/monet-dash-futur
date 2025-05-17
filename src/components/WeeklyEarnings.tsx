@@ -2,15 +2,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-// Sample data - in a real app, this would come from an API
+// Sample data with zeroed values
 const data = [
-  { name: "Lun", earnings: 500 },
-  { name: "Mar", earnings: 950 },
-  { name: "Mer", earnings: 1200 },
-  { name: "Jeu", earnings: 1750 },
-  { name: "Ven", earnings: 2100 },
-  { name: "Sam", earnings: 2500 },
-  { name: "Dim", earnings: 3000 },
+  { name: "Lun", earnings: 0 },
+  { name: "Mar", earnings: 0 },
+  { name: "Mer", earnings: 0 },
+  { name: "Jeu", earnings: 0 },
+  { name: "Ven", earnings: 0 },
+  { name: "Sam", earnings: 0 },
+  { name: "Dim", earnings: 0 },
 ];
 
 const formatNumber = (number: number) => {

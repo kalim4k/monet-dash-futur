@@ -39,38 +39,38 @@ const Index = () => {
             <div className="grid gap-4 grid-cols-2 sm:grid-cols-2">
               <StatCard
                 title="Gains Totaux"
-                value="4.080 FCFA"
-                impressions={4212}
+                value="0 FCFA"
+                impressions={0}
                 description="vs Yesterday"
-                percentage={-51.46}
-                comparedTo="8.406 FCFA"
+                percentage={0}
+                comparedTo="0 FCFA"
                 color="pink"
               />
               <StatCard
                 title="Gains de la semaine"
-                value="8.406 FCFA"
-                impressions={10773}
+                value="0 FCFA"
+                impressions={0}
                 description="vs Previous day"
-                percentage={-2.76}
-                comparedTo="8.645 FCFA"
+                percentage={0}
+                comparedTo="0 FCFA"
                 color="blue"
               />
               <StatCard
                 title="Clics totaux générés"
-                value="12.486 FCFA"
-                impressions={14985}
+                value="0 FCFA"
+                impressions={0}
                 description="vs Last payment circle"
-                percentage={-89.89}
-                comparedTo="123.539 FCFA"
+                percentage={0}
+                comparedTo="0 FCFA"
                 color="green"
               />
               <StatCard
                 title="Bonus Reçus"
-                value="136.025 FCFA"
-                impressions={236650}
+                value="0 FCFA"
+                impressions={0}
                 description="vs Last month"
-                percentage={-62.53}
-                comparedTo="363.023 FCFA"
+                percentage={0}
+                comparedTo="0 FCFA"
                 color="yellow"
               />
             </div>
