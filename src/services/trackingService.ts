@@ -156,14 +156,28 @@ export const reviewClick = async (clickId: string, isValid: boolean) => {
           
         const payout = productData?.payout_per_click || 1;
         
-        // Mettre à jour les statistiques du lien d'affiliation manuellement au lieu d'utiliser rpc
-        await supabase
+        // Utiliser une approche mathématique directe au lieu de supabase.sql
+        // Récupérer d'abord les valeurs actuelles
+        const { data: currentLink } = await supabase
           .from('affiliate_links')
-          .update({
-            total_clicks: supabase.sql`total_clicks - 1`,
-            earnings: supabase.sql`earnings - ${payout}`
-          })
-          .eq('id', clickData.affiliate_link_id);
+          .select('total_clicks, earnings')
+          .eq('id', clickData.affiliate_link_id)
+          .single();
+        
+        if (currentLink) {
+          // Calculer les nouvelles valeurs
+          const newTotalClicks = Math.max(0, (currentLink.total_clicks || 1) - 1);
+          const newEarnings = Math.max(0, (currentLink.earnings || payout) - payout);
+          
+          // Mettre à jour avec les nouvelles valeurs
+          await supabase
+            .from('affiliate_links')
+            .update({
+              total_clicks: newTotalClicks,
+              earnings: newEarnings
+            })
+            .eq('id', clickData.affiliate_link_id);
+        }
       }
     }
     
