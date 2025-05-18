@@ -6,9 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const ProductPage = () => {
+const PenisEnlargementPage = () => {
   const [clickCount, setClickCount] = useState(() => {
-    const savedCount = localStorage.getItem("productClickCount");
+    const savedCount = localStorage.getItem("penisEnlargementClickCount");
     return savedCount ? parseInt(savedCount) : 0;
   });
   const { toast } = useToast();
@@ -32,7 +32,7 @@ const ProductPage = () => {
   
   useEffect(() => {
     // Sauvegarder le compteur dans le localStorage
-    localStorage.setItem("productClickCount", clickCount.toString());
+    localStorage.setItem("penisEnlargementClickCount", clickCount.toString());
   }, [clickCount]);
   
   const handleButtonClick = () => {
@@ -71,10 +71,10 @@ const ProductPage = () => {
           <Card className="overflow-hidden border-none shadow-lg">
             <div className="grid md:grid-cols-2 gap-6">
               {/* Image du produit */}
-              <div className="relative flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 p-6 rounded-lg">
+              <div className="relative flex items-center justify-center bg-gradient-to-br from-blue-50 to-teal-50 p-6 rounded-lg">
                 <img 
-                  src="https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-18-mai-2025-16_07_08.png" 
-                  alt="50 Jeux à Faire en Couple" 
+                  src="https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-18-mai-2025-16_13_58.png" 
+                  alt="Comment Grossir son Pénis de Manière Naturelle" 
                   className="max-h-[500px] w-auto object-contain rounded-md shadow-md"
                 />
               </div>
@@ -83,52 +83,55 @@ const ProductPage = () => {
               <div className="flex flex-col justify-between p-6">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <Badge className="bg-pink-500 hover:bg-pink-600">Ebook</Badge>
+                    <Badge className="bg-blue-500 hover:bg-blue-600">Ebook</Badge>
                   </div>
                   
                   <CardTitle className="text-3xl font-bold text-gray-900 mb-4">
-                    50 Jeux à Faire en Couple
+                    Comment Grossir son Pénis de Manière Naturelle – Guide Complet pour une Virilité Épanouie !
                   </CardTitle>
                   
                   <CardDescription className="text-gray-700 text-base space-y-4">
                     <p>
-                      Vous souhaitez raviver la flamme dans votre couple ? Vous cherchez des idées originales pour pimenter vos moments à deux ? 
-                      Découvrez notre ebook "50 Jeux à Faire en Couple", une collection unique d'activités ludiques conçues pour renforcer 
-                      votre complicité et créer des souvenirs inoubliables.
+                      Vous souhaitez gagner en confiance et améliorer votre vie intime ? Découvrez notre ebook "Comment Grossir son Pénis de Manière Naturelle", 
+                      un guide complet et scientifique pour vous aider à atteindre vos objectifs sans produits chimiques, ni méthodes dangereuses.
                     </p>
                     
                     <div className="mt-4">
-                      <p className="text-pink-600 font-semibold mb-2">💖 Ce que vous trouverez dans cet ebook :</p>
+                      <p className="text-blue-600 font-semibold mb-2">🍃 Ce que vous trouverez dans cet ebook :</p>
                       <ul className="space-y-2">
                         <li className="flex">
                           <span className="text-green-600 mr-2">✅</span> 
-                          <span>50 jeux variés adaptés à tous les couples : jeux de réflexion, défis amusants, jeux de séduction, et bien plus encore.</span>
+                          <span>Des techniques naturelles, testées et approuvées pour stimuler la croissance.</span>
                         </li>
                         <li className="flex">
                           <span className="text-green-600 mr-2">✅</span> 
-                          <span>Des instructions claires et faciles à suivre pour chaque jeu.</span>
+                          <span>Des exercices pratiques expliqués pas à pas pour maximiser les résultats.</span>
                         </li>
                         <li className="flex">
                           <span className="text-green-600 mr-2">✅</span> 
-                          <span>Des conseils pour personnaliser les jeux selon vos préférences.</span>
+                          <span>Une alimentation spécifique et des compléments naturels recommandés.</span>
                         </li>
                         <li className="flex">
                           <span className="text-green-600 mr-2">✅</span> 
-                          <span>Un format pratique et accessible, que vous pouvez consulter sur votre smartphone, tablette ou ordinateur.</span>
+                          <span>Des conseils pour améliorer votre endurance et votre performance.</span>
+                        </li>
+                        <li className="flex">
+                          <span className="text-green-600 mr-2">✅</span> 
+                          <span>Une approche basée sur la science, sans risques pour votre santé.</span>
                         </li>
                       </ul>
                     </div>
                     
-                    <div className="mt-4 p-4 bg-amber-50 rounded-md border border-amber-200">
-                      <p className="font-semibold text-amber-800">🎁 Bonus Exclusif</p>
-                      <p className="text-amber-700">
-                        Une section spéciale pour les couples à distance avec des jeux adaptés pour maintenir la flamme même loin l'un de l'autre.
+                    <div className="mt-4 p-4 bg-teal-50 rounded-md border border-teal-200">
+                      <p className="font-semibold text-teal-800">🚀 Bonus Exclusif</p>
+                      <p className="text-teal-700">
+                        Une section spéciale pour maintenir les résultats durablement et optimiser votre vie intime.
                       </p>
                     </div>
                     
                     <p className="mt-4">
-                      Ne laissez plus la routine s'installer dans votre relation. Offrez-vous dès maintenant des moments magiques avec votre partenaire 
-                      grâce à "50 Jeux à Faire en Couple" !
+                      N'attendez plus pour gagner en confiance et vivre une vie sexuelle épanouie. Prenez le contrôle dès maintenant 
+                      avec notre guide "Comment Grossir son Pénis de Manière Naturelle" !
                     </p>
                   </CardDescription>
                 </div>
@@ -141,7 +144,7 @@ const ProductPage = () => {
                   </p>
                   <Button 
                     onClick={handleButtonClick}
-                    className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-lg py-6"
+                    className="w-full bg-gradient-to-r from-blue-500 to-teal-600 hover:from-blue-600 hover:to-teal-700 text-lg py-6"
                   >
                     {clickCount < requiredClicks 
                       ? "OBTENIR MAINTENANT" 
@@ -163,4 +166,4 @@ const ProductPage = () => {
   );
 };
 
-export default ProductPage;
+export default PenisEnlargementPage;

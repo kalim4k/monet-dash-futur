@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ProductPage from "./pages/ProductPage";
+import PenisEnlargementPage from "./pages/PenisEnlargementPage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/product" element={<ProductPage />} />
+            <Route path="/penis-enlargement" element={<PenisEnlargementPage />} />
             
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Index />} />
