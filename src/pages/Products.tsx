@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Share2, ExternalLink, ClipboardCopy, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "react-router-dom";
 
 type Product = {
   id: string;
@@ -19,6 +20,7 @@ type Product = {
   active: boolean;
   affiliate_link?: string | null;
   clicks_count?: number;
+  page_path?: string; // Chemin vers la page du produit
 };
 
 const Products = () => {
@@ -30,22 +32,58 @@ const Products = () => {
   const [copied, setCopied] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
+    // Simuler le chargement des produits
     const loadProducts = async () => {
-      if (!user) return;
-      
       try {
         setLoading(true);
         
-        // Charger tous les produits actifs
-        const { data: productsData, error: productsError } = await supabase
-          .from('products')
-          .select('*')
-          .eq('active', true);
-          
-        if (productsError) throw productsError;
+        // Produits spécifiques que nous avons créés
+        const ourProducts = [
+          {
+            id: "paypal-account",
+            name: "Comment créer un compte PayPal vérifié en Afrique",
+            description: "Le guide complet pour sécuriser vos paiements en ligne",
+            image_url: "https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-18-mai-2025-16_24_13.png",
+            active: true,
+            page_path: "/paypal-account"
+          },
+          {
+            id: "capcut-pro",
+            name: "Capcut Pro à Vie",
+            description: "Éditez vos vidéos comme un pro sans limites",
+            image_url: "https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-22-avr.-2025-22_20_13.png",
+            active: true,
+            page_path: "/capcut-pro"
+          },
+          {
+            id: "fantasmes-couple",
+            name: "100 Fantasmes à Explorer à Deux",
+            description: "Redécouvrez Votre Complicité et Pimentez Votre Vie de Couple !",
+            image_url: "https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-18-mai-2025-16_40_05.png",
+            active: true,
+            page_path: "/fantasmes-couple"
+          },
+          {
+            id: "penis-enlargement",
+            name: "Comment Agrandir Son Penis Naturellement",
+            description: "Méthodes naturelles qui fonctionnent réellement",
+            image_url: "https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-18-mai-2025-16_30_41.png",
+            active: true,
+            page_path: "/penis-enlargement"
+          },
+          {
+            id: "tiktok-monetization",
+            name: "Comment Monétiser ses Vidéos TikTok",
+            description: "Gagnez de l'argent avec vos vidéos virales",
+            image_url: "https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-22-avr.-2025-22_19_23.png",
+            active: true,
+            page_path: "/tiktok-monetization"
+          }
+        ];
         
-        if (!productsData) {
-          setProducts([]);
+        if (!user) {
+          setProducts(ourProducts);
+          setLoading(false);
           return;
         }
         
@@ -73,7 +111,7 @@ const Products = () => {
         }));
         
         // Associer les liens d'affiliation aux produits
-        const productsWithLinks = productsData.map((product) => {
+        const productsWithLinks = ourProducts.map((product) => {
           const link = linksWithClicks.find(l => l.product_id === product.id);
           return {
             ...product,
@@ -229,7 +267,7 @@ const Products = () => {
                       )}
                     </CardContent>
                     
-                    <CardFooter className="flex justify-end">
+                    <CardFooter className="flex flex-col gap-2">
                       {!product.affiliate_link ? (
                         <Button 
                           onClick={() => generateAffiliateLink(product.id)}
@@ -266,12 +304,19 @@ const Products = () => {
                               )}
                             </Button>
                           </div>
-                          <Button variant="outline" className="w-full">
-                            <ExternalLink className="mr-2 h-4 w-4" />
-                            Voir le produit
-                          </Button>
                         </div>
                       )}
+                      
+                      <Button 
+                        variant="outline" 
+                        className="w-full" 
+                        asChild
+                      >
+                        <Link to={product.page_path || "#"}>
+                          <ExternalLink className="mr-2 h-4 w-4" />
+                          Voir le produit
+                        </Link>
+                      </Button>
                     </CardFooter>
                   </Card>
                 ))
