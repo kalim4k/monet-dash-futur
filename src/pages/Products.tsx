@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -78,7 +77,7 @@ const Products = () => {
             id: "penis-enlargement",
             name: "Comment Agrandir Son Penis Naturellement",
             description: "Méthodes naturelles qui fonctionnent réellement",
-            image_url: "https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-18-mai-2025-16_30_41.png",
+            image_url: "https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-18-mai-2025-16_13_58.png",
             active: true,
             affiliate_link: "https://monet-dash-futur.lovable.app/penis-enlargement",
             page_path: "/penis-enlargement"
@@ -87,7 +86,7 @@ const Products = () => {
             id: "tiktok-monetization",
             name: "Comment Monétiser ses Vidéos TikTok",
             description: "Gagnez de l'argent avec vos vidéos virales",
-            image_url: "https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-22-avr.-2025-22_19_23.png",
+            image_url: "https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-18-mai-2025-16_20_20.png",
             active: true,
             affiliate_link: "https://monet-dash-futur.lovable.app/tiktok-monetization",
             page_path: "/tiktok-monetization"
@@ -111,29 +110,29 @@ const Products = () => {
           };
         });
         
-        // Récupérer les statistiques de clics pour chaque produit de façon plus simple
-        const userClickStats = await Promise.all(
-          productsWithUserLinks.map(async (product) => {
-            try {
-              // Vérifie si des statistiques existent pour ce produit et cet utilisateur
-              const { count, error } = await supabase
-                .from('clicks')
-                .select('*', { count: 'exact', head: true })
-                .eq('affiliate_link_id', product.id)
-                .eq('user_id', user.id);
-              
-              if (error) {
-                console.error("Erreur lors du comptage des clics:", error);
-                return { ...product, clicks_count: 0 };
-              }
-              
-              return { ...product, clicks_count: count || 0 };
-            } catch (err) {
-              console.error("Erreur:", err);
-              return { ...product, clicks_count: 0 };
+        // Version simplifiée pour éviter l'erreur de type
+        const userClickStats: Product[] = [];
+        
+        // Parcourir chaque produit et récupérer ses statistiques de clics
+        for (const product of productsWithUserLinks) {
+          try {
+            const { count, error } = await supabase
+              .from('clicks')
+              .select('*', { count: 'exact', head: true })
+              .eq('affiliate_link_id', product.id)
+              .eq('user_id', user.id);
+            
+            if (error) {
+              console.error("Erreur lors du comptage des clics:", error);
+              userClickStats.push({ ...product, clicks_count: 0 });
+            } else {
+              userClickStats.push({ ...product, clicks_count: count || 0 });
             }
-          })
-        );
+          } catch (err) {
+            console.error("Erreur:", err);
+            userClickStats.push({ ...product, clicks_count: 0 });
+          }
+        }
         
         setProducts(userClickStats);
         
@@ -215,6 +214,11 @@ const Products = () => {
                           alt={product.name}
                           className="h-full w-full object-cover transition-all hover:scale-105"
                           loading="lazy"
+                          onError={(e) => {
+                            console.log(`Erreur de chargement pour l'image: ${product.image_url}`);
+                            // Fallback à une image par défaut en cas d'erreur
+                            e.currentTarget.src = "https://via.placeholder.com/600x400?text=Image+non+disponible";
+                          }}
                         />
                       </div>
                     ) : (
