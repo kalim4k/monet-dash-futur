@@ -210,6 +210,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      record_affiliate_click: {
+        Args: {
+          _affiliate_link_id: string
+          _user_id: string
+          _ip_address: string
+          _user_agent: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "affiliate"

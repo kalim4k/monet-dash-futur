@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTracking } from "@/hooks/useTracking";
 
 const ProductPage = () => {
   const [clickCount, setClickCount] = useState(() => {
@@ -13,6 +14,9 @@ const ProductPage = () => {
   });
   const { toast } = useToast();
   const requiredClicks = 10;
+  
+  // Utiliser le hook de tracking pour enregistrer la visite via le lien d'affiliation
+  useTracking("product");
   
   // Liste des liens publicitaires
   const adLinks = [

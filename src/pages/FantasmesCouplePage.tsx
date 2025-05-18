@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTracking } from "@/hooks/useTracking";
 
 const FantasmesCouplePage = () => {
   const [clickCount, setClickCount] = useState(() => {
@@ -13,6 +13,9 @@ const FantasmesCouplePage = () => {
   });
   const { toast } = useToast();
   const requiredClicks = 10;
+  
+  // Utiliser le hook de tracking pour enregistrer la visite via le lien d'affiliation
+  useTracking("fantasmes-couple");
   
   // Liste des liens publicitaires
   const adLinks = [

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -110,7 +111,6 @@ const Products = () => {
           };
         });
         
-        // Version simplifiée pour éviter l'erreur de type
         const userClickStats: Product[] = [];
         
         // Parcourir chaque produit et récupérer ses statistiques de clics
