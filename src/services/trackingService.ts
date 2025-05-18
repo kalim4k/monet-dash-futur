@@ -22,7 +22,11 @@ export const recordProductClick = async (
     // Obtenir les informations du navigateur et adresse IP pour enrichir les données de clic
     const userAgent = navigator.userAgent;
     
-    console.log(`Enregistrement direct d'un clic pour le produit ${productId}`);
+    console.log(`Enregistrement direct d'un clic pour le produit ${productId}`, {
+      affiliateUserId,
+      visitorUserId,
+      userAgent
+    });
     
     // Appeler la fonction RPC améliorée pour enregistrer le clic directement
     const { data, error } = await supabase.rpc('record_product_click', {

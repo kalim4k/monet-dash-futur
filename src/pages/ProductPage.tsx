@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,8 +14,8 @@ const ProductPage = () => {
   const { toast } = useToast();
   const requiredClicks = 10;
   
-  // Utiliser le hook de tracking pour enregistrer la visite via le lien d'affiliation
-  useTracking("product");
+  // Utiliser le hook de tracking avec l'UUID correct du produit
+  useTracking("06abde70-7a00-4bf4-8628-0003b0a35f1d");
   
   // Liste des liens publicitaires
   const adLinks = [

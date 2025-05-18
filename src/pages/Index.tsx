@@ -28,13 +28,20 @@ const Index = () => {
     queryFn: async () => {
       if (!user?.id) return null;
       
+      console.log("Chargement des statistiques pour l'utilisateur:", user.id);
+      
       // Récupérer les statistiques d'affiliation directement depuis la table affiliate_links
       const { data: linksData, error: linksError } = await supabase
         .from('affiliate_links')
-        .select('total_clicks, earnings')
+        .select('id, total_clicks, earnings')
         .eq('user_id', user.id);
       
-      if (linksError) throw linksError;
+      if (linksError) {
+        console.error("Erreur lors de la récupération des liens d'affiliation:", linksError);
+        throw linksError;
+      }
+      
+      console.log("Liens d'affiliation trouvés:", linksData);
       
       // Calculer les totaux
       const totalClicks = linksData?.reduce((sum, link) => sum + (link.total_clicks || 0), 0) || 0;
@@ -44,21 +51,34 @@ const Index = () => {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
       
+      // Récupérer tous les clics valides de la semaine pour cet utilisateur
       const { data: weeklyClicks, error: weeklyError } = await supabase
         .from('clicks')
-        .select('affiliate_link_id, product_id, is_valid')
+        .select('id, affiliate_link_id, product_id, is_valid')
         .gte('clicked_at', oneWeekAgo.toISOString())
-        .eq('is_valid', true)
-        .or(`affiliate_link_id.eq.${user.id},user_id.eq.${user.id}`);
+        .eq('is_valid', true);
       
-      if (weeklyError) throw weeklyError;
+      if (weeklyError) {
+        console.error("Erreur lors de la récupération des clics hebdomadaires:", weeklyError);
+        throw weeklyError;
+      }
       
-      // Compter uniquement les clics valides
-      const validWeeklyClicks = weeklyClicks?.filter(click => click.is_valid).length || 0;
+      console.log("Tous les clics hebdomadaires:", weeklyClicks);
+      
+      // Filtrer les clics pour ne garder que ceux associés aux liens d'affiliation de l'utilisateur
+      const linkIds = linksData?.map(link => link.id) || [];
+      const userWeeklyClicks = weeklyClicks?.filter(click => 
+        linkIds.includes(click.affiliate_link_id || '')
+      ) || [];
+      
+      console.log("Clics hebdomadaires de l'utilisateur:", userWeeklyClicks);
+      
+      // Compter uniquement les clics valides appartenant à l'utilisateur
+      const validWeeklyClicks = userWeeklyClicks.length;
       
       return {
         total: totalEarnings,
-        weekly: validWeeklyClicks, // 1 FCFA par clic
+        weekly: validWeeklyClicks, // 1 FCFA par clic valide hebdomadaire
         clicks: totalClicks,
         bonus: 0 // Pour le moment, pas de système de bonus
       };
@@ -68,6 +88,7 @@ const Index = () => {
   
   useEffect(() => {
     if (userStats) {
+      console.log("Statistiques utilisateur mises à jour:", userStats);
       setEarnings(userStats);
     }
   }, [userStats]);
