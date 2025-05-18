@@ -15,7 +15,8 @@ const PenisEnlargementPage = () => {
   const requiredClicks = 10;
   
   // Utiliser le hook de tracking pour enregistrer la visite via le lien d'affiliation
-  useTracking("penis-enlargement");
+  // ID correspondant à "Penis Enlargement" dans la base de données (format UUID)
+  useTracking("3d6a2f9b-a59d-4e23-9c1f-b9e2b5f88d1a");
   
   // Liste des liens publicitaires
   const adLinks = [

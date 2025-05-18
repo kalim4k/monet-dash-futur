@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +16,7 @@ const PayPalAccountPage = () => {
   const requiredClicks = 10;
   
   // Utiliser le hook de tracking pour enregistrer la visite via le lien d'affiliation
-  // ID correspondant à "Comment créer un compte PayPal vérifié en Afrique" dans la base de données
+  // ID correspondant à "Comment créer un compte PayPal vérifié en Afrique" dans la base de données (format UUID)
   useTracking("9d94b23d-b5b3-4537-b1fa-0a8ef8430856");
   
   // Liste des liens publicitaires

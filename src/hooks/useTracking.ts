@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
-import { getAffiliateParamsFromUrl, recordClick } from "@/services/trackingService";
+import { getAffiliateParamsFromUrl, getOrCreateAffiliateLink, recordClick } from "@/services/trackingService";
+import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * Hook pour gérer le suivi des clics sur les pages de produits
@@ -9,6 +10,7 @@ import { getAffiliateParamsFromUrl, recordClick } from "@/services/trackingServi
 export const useTracking = (productId: string) => {
   const [isTracked, setIsTracked] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const { user } = useAuth();
   
   useEffect(() => {
     const trackPageView = async () => {
@@ -34,16 +36,23 @@ export const useTracking = (productId: string) => {
             return;
           }
           
-          const result = await recordClick(productId, refId);
+          // Obtenir ou créer le lien d'affiliation pour l'utilisateur référant
+          const affiliateLinkId = await getOrCreateAffiliateLink(productId, refId);
           
-          if (result.success) {
-            console.log("Clic comptabilisé avec succès");
-            setIsTracked(true);
+          if (affiliateLinkId) {
+            const result = await recordClick(affiliateLinkId, user?.id);
             
-            // Stocker en session que ce clic a déjà été comptabilisé
-            sessionStorage.setItem(trackingKey, 'true');
+            if (result.success) {
+              console.log("Clic comptabilisé avec succès");
+              setIsTracked(true);
+              
+              // Stocker en session que ce clic a déjà été comptabilisé
+              sessionStorage.setItem(trackingKey, 'true');
+            } else {
+              console.error("Échec de l'enregistrement du clic:", result.error);
+            }
           } else {
-            console.error("Échec de l'enregistrement du clic:", result.error);
+            console.error("Impossible d'obtenir un lien d'affiliation pour ce produit et cet utilisateur");
           }
         } else {
           console.log("Aucun ID d'affilié dans l'URL");
@@ -56,7 +65,7 @@ export const useTracking = (productId: string) => {
     };
     
     trackPageView();
-  }, [productId, isTracked, isProcessing]);
+  }, [productId, isTracked, isProcessing, user]);
   
   return { isTracked };
 };

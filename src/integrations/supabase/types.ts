@@ -206,6 +206,10 @@ export type Database = {
         Args: { user_id: string }
         Returns: number
       }
+      get_or_create_affiliate_link: {
+        Args: { _user_id: string; _product_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _user_id: string
@@ -214,12 +218,19 @@ export type Database = {
         Returns: boolean
       }
       record_affiliate_click: {
-        Args: {
-          _affiliate_link_id: string
-          _user_id: string
-          _ip_address: string
-          _user_agent: string
-        }
+        Args:
+          | {
+              _affiliate_link_id: string
+              _user_id: string
+              _ip_address: string
+              _user_agent: string
+            }
+          | {
+              _affiliate_link_id: string
+              _user_id: string
+              _ip_address: string
+              _user_agent: string
+            }
         Returns: string
       }
     }

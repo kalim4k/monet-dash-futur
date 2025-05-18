@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
@@ -15,7 +16,7 @@ const FantasmesCouplePage = () => {
   const requiredClicks = 10;
   
   // Utiliser le hook de tracking pour enregistrer la visite via le lien d'affiliation
-  // ID correspondant à "100 Fantasmes à Explorer à Deux" dans la base de données
+  // ID correspondant à "100 Fantasmes à Explorer à Deux" dans la base de données (format UUID)
   useTracking("a771934a-73f6-4c63-b3a9-2c63a8e59d9c");
   
   // Liste des liens publicitaires
