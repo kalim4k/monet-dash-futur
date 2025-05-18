@@ -23,39 +23,36 @@ export const useTracking = (productId: string) => {
         // Vérifier si l'utilisateur vient d'un lien d'affiliation
         const { refId } = getAffiliateParamsFromUrl();
         
-        // Si un ID d'affilié est présent dans l'URL, enregistrer le clic
-        if (refId) {
-          console.log(`Traitement du clic pour le produit ${productId} référé par ${refId}`);
+        // Utiliser l'ID affilié de l'URL ou un ID système par défaut si aucun refId n'est présent
+        const affiliateUserId = refId || null;
+        console.log(`Traitement du clic pour le produit ${productId}${affiliateUserId ? ` référé par ${affiliateUserId}` : ' (visite directe)'}`);
+        
+        // Vérifier si le clic n'a pas déjà été traité dans cette session
+        const trackingKey = `tracked_${productId}_${affiliateUserId || 'direct'}`;
+        if (sessionStorage.getItem(trackingKey)) {
+          console.log("Ce clic a déjà été comptabilisé dans cette session");
+          setIsTracked(true);
+          setIsProcessing(false);
+          return;
+        }
+        
+        // Obtenir ou créer le lien d'affiliation pour l'utilisateur référant ou le système
+        const affiliateLinkId = await getOrCreateAffiliateLink(productId, affiliateUserId);
+        
+        if (affiliateLinkId) {
+          const result = await recordClick(affiliateLinkId, user?.id);
           
-          // Vérifier si le clic n'a pas déjà été traité dans cette session
-          const trackingKey = `tracked_${productId}_${refId}`;
-          if (sessionStorage.getItem(trackingKey)) {
-            console.log("Ce clic a déjà été comptabilisé dans cette session");
+          if (result.success) {
+            console.log("Clic comptabilisé avec succès");
             setIsTracked(true);
-            setIsProcessing(false);
-            return;
-          }
-          
-          // Obtenir ou créer le lien d'affiliation pour l'utilisateur référant
-          const affiliateLinkId = await getOrCreateAffiliateLink(productId, refId);
-          
-          if (affiliateLinkId) {
-            const result = await recordClick(affiliateLinkId, user?.id);
             
-            if (result.success) {
-              console.log("Clic comptabilisé avec succès");
-              setIsTracked(true);
-              
-              // Stocker en session que ce clic a déjà été comptabilisé
-              sessionStorage.setItem(trackingKey, 'true');
-            } else {
-              console.error("Échec de l'enregistrement du clic:", result.error);
-            }
+            // Stocker en session que ce clic a déjà été comptabilisé
+            sessionStorage.setItem(trackingKey, 'true');
           } else {
-            console.error("Impossible d'obtenir un lien d'affiliation pour ce produit et cet utilisateur");
+            console.error("Échec de l'enregistrement du clic:", result.error);
           }
         } else {
-          console.log("Aucun ID d'affilié dans l'URL");
+          console.error("Impossible d'obtenir un lien d'affiliation pour ce produit et cet utilisateur");
         }
       } catch (error) {
         console.error("Erreur lors du suivi de la page:", error);

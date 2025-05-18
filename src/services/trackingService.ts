@@ -9,13 +9,14 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export const getOrCreateAffiliateLink = async (productId: string, userId?: string): Promise<string | null> => {
   try {
-    if (!userId) return null;
+    // Si aucun ID utilisateur n'est fourni, utiliser un ID système par défaut
+    const affiliateUserId = userId || "00000000-0000-0000-0000-000000000000"; // ID spécial pour le système
     
-    console.log(`Création/récupération du lien d'affiliation pour le produit ${productId} et l'utilisateur ${userId}`);
+    console.log(`Création/récupération du lien d'affiliation pour le produit ${productId} et l'utilisateur ${affiliateUserId}`);
     
     // Appeler la fonction RPC pour obtenir ou créer un lien d'affiliation
     const { data: affiliateLinkId, error } = await supabase.rpc('get_or_create_affiliate_link', {
-      _user_id: userId,
+      _user_id: affiliateUserId,
       _product_id: productId
     });
     
