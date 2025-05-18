@@ -15,7 +15,8 @@ const FantasmesCouplePage = () => {
   const requiredClicks = 10;
   
   // Utiliser le hook de tracking pour enregistrer la visite via le lien d'affiliation
-  useTracking("fantasmes-couple");
+  // ID correspondant à "100 Fantasmes à Explorer à Deux" dans la base de données
+  useTracking("a771934a-73f6-4c63-b3a9-2c63a8e59d9c");
   
   // Liste des liens publicitaires
   const adLinks = [

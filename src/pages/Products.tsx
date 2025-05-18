@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -38,72 +37,68 @@ const Products = () => {
       try {
         setLoading(true);
         
-        // Produits spécifiques avec leurs liens d'affiliation prédéfinis
-        const ourProducts = [
-          {
-            id: "product",
-            name: "50 Jeux à Faire en Couple",
-            description: "Redécouvrez votre complicité grâce à ce guide de jeux à deux",
-            image_url: "https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-18-mai-2025-16_07_08.png",
-            active: true,
-            affiliate_link: "https://monet-dash-futur.lovable.app/product",
-            page_path: "/product"
-          },
-          {
-            id: "paypal-account",
-            name: "Comment créer un compte PayPal vérifié en Afrique",
-            description: "Le guide complet pour sécuriser vos paiements en ligne",
-            image_url: "https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-18-mai-2025-16_24_13.png",
-            active: true,
-            affiliate_link: "https://monet-dash-futur.lovable.app/paypal-account",
-            page_path: "/paypal-account"
-          },
-          {
-            id: "capcut-pro",
-            name: "Capcut Pro à Vie",
-            description: "Éditez vos vidéos comme un pro sans limites",
-            image_url: "https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-22-avr.-2025-22_20_13.png",
-            active: true,
-            affiliate_link: "https://monet-dash-futur.lovable.app/capcut-pro",
-            page_path: "/capcut-pro"
-          },
-          {
-            id: "fantasmes-couple",
-            name: "100 Fantasmes à Explorer à Deux",
-            description: "Redécouvrez Votre Complicité et Pimentez Votre Vie de Couple !",
-            image_url: "https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-18-mai-2025-16_40_05.png",
-            active: true,
-            affiliate_link: "https://monet-dash-futur.lovable.app/fantasmes-couple",
-            page_path: "/fantasmes-couple"
-          },
-          {
-            id: "penis-enlargement",
-            name: "Comment Agrandir Son Penis Naturellement",
-            description: "Méthodes naturelles qui fonctionnent réellement",
-            image_url: "https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-18-mai-2025-16_13_58.png",
-            active: true,
-            affiliate_link: "https://monet-dash-futur.lovable.app/penis-enlargement",
-            page_path: "/penis-enlargement"
-          },
-          {
-            id: "tiktok-monetization",
-            name: "Comment Monétiser ses Vidéos TikTok",
-            description: "Gagnez de l'argent avec vos vidéos virales",
-            image_url: "https://orawin.fun/wp-content/uploads/2025/05/ChatGPT-Image-18-mai-2025-16_20_20.png",
-            active: true,
-            affiliate_link: "https://monet-dash-futur.lovable.app/tiktok-monetization",
-            page_path: "/tiktok-monetization"
+        // Récupérer les produits depuis la base de données
+        const { data: dbProducts, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('active', true);
+          
+        if (error) {
+          throw error;
+        }
+        
+        if (!dbProducts || dbProducts.length === 0) {
+          setProducts([]);
+          setLoading(false);
+          return;
+        }
+        
+        // Mapper les produits avec leurs liens et chemins
+        const productsWithPaths = dbProducts.map(product => {
+          // Déterminer le chemin de la page en fonction de l'ID du produit
+          let pagePath = '';
+          
+          switch (product.id) {
+            case '06abde70-7a00-4bf4-8628-0003b0a35f1d':
+              pagePath = '/product';
+              break;
+            case '9d94b23d-b5b3-4537-b1fa-0a8ef8430856':
+              pagePath = '/paypal-account';
+              break;
+            case 'f6a3cdb6-6fa5-4413-a431-2682d1a1003c':
+              pagePath = '/capcut-pro';
+              break;
+            case 'a771934a-73f6-4c63-b3a9-2c63a8e59d9c':
+              pagePath = '/fantasmes-couple';
+              break;
+            case '3d6a2f9b-a59d-4e23-9c1f-b9e2b5f88d1a':
+              pagePath = '/penis-enlargement';
+              break;
+            case 'c1e7a9d3-8b4f-4c92-9a6e-5f1d2e3b4c5a':
+              pagePath = '/tiktok-monetization';
+              break;
+            default:
+              pagePath = '/product';
           }
-        ] as Product[];
+          
+          // Construire l'URL d'affiliation de base
+          const baseUrl = `https://monet-dash-futur.lovable.app${pagePath}`;
+          
+          return {
+            ...product,
+            affiliate_link: baseUrl,
+            page_path: pagePath
+          };
+        });
         
         if (!user) {
-          setProducts(ourProducts);
+          setProducts(productsWithPaths);
           setLoading(false);
           return;
         }
         
         // Ajouter l'ID de l'utilisateur à chaque lien d'affiliation pour le tracking
-        const productsWithUserLinks = ourProducts.map(product => {
+        const productsWithUserLinks = productsWithPaths.map(product => {
           const separator = product.affiliate_link.includes('?') ? '&' : '?';
           const affiliateLink = `${product.affiliate_link}${separator}ref=${user.id}`;
           

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
@@ -15,7 +16,8 @@ const CapcutProPage = () => {
   const requiredClicks = 10;
   
   // Utiliser le hook de tracking pour enregistrer la visite via le lien d'affiliation
-  useTracking("capcut-pro");
+  // ID correspondant à "Capcut Pro à Vie" dans la base de données
+  useTracking("f6a3cdb6-6fa5-4413-a431-2682d1a1003c");
   
   // Liste des liens publicitaires
   const adLinks = [
