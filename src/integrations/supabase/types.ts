@@ -48,6 +48,7 @@ export type Database = {
           id: string
           ip_address: string | null
           user_agent: string | null
+          user_id: string | null
         }
         Insert: {
           affiliate_link_id: string
@@ -55,6 +56,7 @@ export type Database = {
           id?: string
           ip_address?: string | null
           user_agent?: string | null
+          user_id?: string | null
         }
         Update: {
           affiliate_link_id?: string
@@ -62,6 +64,7 @@ export type Database = {
           id?: string
           ip_address?: string | null
           user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {

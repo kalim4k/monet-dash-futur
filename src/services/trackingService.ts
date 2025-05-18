@@ -10,6 +10,8 @@ export const recordClick = async (affiliateId: string, userId?: string) => {
   try {
     // Obtenir les informations du navigateur pour enrichir les données de clic
     const userAgent = navigator.userAgent;
+    
+    console.log(`Enregistrement d'un clic pour le produit ${affiliateId} par l'utilisateur ${userId || 'anonyme'}`);
 
     // Appeler la fonction RPC pour enregistrer le clic
     const { data, error } = await supabase.rpc('record_affiliate_click', {
@@ -24,6 +26,7 @@ export const recordClick = async (affiliateId: string, userId?: string) => {
       return { success: false, error };
     }
     
+    console.log("Clic enregistré avec succès:", data);
     return { success: true, clickId: data };
   } catch (err) {
     console.error("Exception lors de l'enregistrement du clic:", err);

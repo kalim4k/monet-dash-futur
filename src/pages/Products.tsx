@@ -118,6 +118,9 @@ const Products = () => {
         // Parcourir chaque produit et récupérer ses statistiques de clics
         for (const product of productsWithUserLinks) {
           try {
+            console.log(`Récupération des clics pour le produit ${product.id} de l'utilisateur ${user.id}`);
+            
+            // Requête pour compter les clics du produit spécifique pour cet utilisateur
             const { count, error } = await supabase
               .from('clicks')
               .select('*', { count: 'exact', head: true })
@@ -128,10 +131,11 @@ const Products = () => {
               console.error("Erreur lors du comptage des clics:", error);
               userClickStats.push({ ...product, clicks_count: 0 });
             } else {
+              console.log(`Produit ${product.id}: ${count || 0} clics trouvés`);
               userClickStats.push({ ...product, clicks_count: count || 0 });
             }
           } catch (err) {
-            console.error("Erreur:", err);
+            console.error("Erreur lors de la récupération des clics:", err);
             userClickStats.push({ ...product, clicks_count: 0 });
           }
         }

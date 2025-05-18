@@ -23,14 +23,30 @@ export const useTracking = (productId: string) => {
         
         // Si un ID d'affilié est présent dans l'URL, enregistrer le clic
         if (refId) {
+          console.log(`Traitement du clic pour le produit ${productId} référé par ${refId}`);
+          
+          // Vérifier si le clic n'a pas déjà été traité dans cette session
+          const trackingKey = `tracked_${productId}_${refId}`;
+          if (sessionStorage.getItem(trackingKey)) {
+            console.log("Ce clic a déjà été comptabilisé dans cette session");
+            setIsTracked(true);
+            setIsProcessing(false);
+            return;
+          }
+          
           const result = await recordClick(productId, refId);
           
           if (result.success) {
+            console.log("Clic comptabilisé avec succès");
             setIsTracked(true);
             
             // Stocker en session que ce clic a déjà été comptabilisé
-            sessionStorage.setItem(`tracked_${productId}_${refId}`, 'true');
+            sessionStorage.setItem(trackingKey, 'true');
+          } else {
+            console.error("Échec de l'enregistrement du clic:", result.error);
           }
+        } else {
+          console.log("Aucun ID d'affilié dans l'URL");
         }
       } catch (error) {
         console.error("Erreur lors du suivi de la page:", error);
