@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 
-type Product = {
+interface Product {
   id: string;
   name: string;
   description: string | null;
@@ -21,7 +21,7 @@ type Product = {
   affiliate_link: string;
   clicks_count?: number;
   page_path: string;
-};
+}
 
 const Products = () => {
   const { user } = useAuth();
