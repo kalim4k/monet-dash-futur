@@ -36,13 +36,6 @@ export const useTracking = (productId: string) => {
           return;
         }
         
-        // Ajouter plus de logs pour le débogage
-        console.log("Données de tracking:", {
-          productId,
-          affiliateUserId,
-          visitorUserId: user?.id
-        });
-        
         // Enregistrer directement le clic sur le produit
         const result = await recordProductClick(
           productId,
@@ -51,7 +44,7 @@ export const useTracking = (productId: string) => {
         );
         
         if (result.success) {
-          console.log("Clic comptabilisé avec succès:", result);
+          console.log("Clic comptabilisé avec succès");
           setIsTracked(true);
           
           // Stocker en session que ce clic a déjà été comptabilisé
@@ -66,13 +59,7 @@ export const useTracking = (productId: string) => {
       }
     };
     
-    // Exécuter le tracking uniquement si productId est valide
-    if (productId) {
-      console.log("Initialisation du tracking pour le produit:", productId);
-      trackPageView();
-    } else {
-      console.error("ID de produit invalide pour le tracking");
-    }
+    trackPageView();
   }, [productId, isTracked, isProcessing, user]);
   
   return { isTracked };

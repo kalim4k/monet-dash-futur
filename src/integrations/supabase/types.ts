@@ -13,28 +13,22 @@ export type Database = {
         Row: {
           code: string
           created_at: string
-          earnings: number | null
           id: string
           product_id: string
-          total_clicks: number | null
           user_id: string
         }
         Insert: {
           code: string
           created_at?: string
-          earnings?: number | null
           id?: string
           product_id: string
-          total_clicks?: number | null
           user_id: string
         }
         Update: {
           code?: string
           created_at?: string
-          earnings?: number | null
           id?: string
           product_id?: string
-          total_clicks?: number | null
           user_id?: string
         }
         Relationships: [
@@ -53,8 +47,6 @@ export type Database = {
           clicked_at: string
           id: string
           ip_address: string | null
-          is_reviewed: boolean | null
-          is_valid: boolean | null
           product_id: string | null
           user_agent: string | null
           user_id: string | null
@@ -64,8 +56,6 @@ export type Database = {
           clicked_at?: string
           id?: string
           ip_address?: string | null
-          is_reviewed?: boolean | null
-          is_valid?: boolean | null
           product_id?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -75,8 +65,6 @@ export type Database = {
           clicked_at?: string
           id?: string
           ip_address?: string | null
-          is_reviewed?: boolean | null
-          is_valid?: boolean | null
           product_id?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -139,7 +127,6 @@ export type Database = {
           id: string
           image_url: string | null
           name: string
-          payout_per_click: number | null
         }
         Insert: {
           active?: boolean
@@ -148,7 +135,6 @@ export type Database = {
           id?: string
           image_url?: string | null
           name: string
-          payout_per_click?: number | null
         }
         Update: {
           active?: boolean
@@ -157,7 +143,6 @@ export type Database = {
           id?: string
           image_url?: string | null
           name?: string
-          payout_per_click?: number | null
         }
         Relationships: []
       }
