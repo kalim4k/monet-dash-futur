@@ -11,6 +11,7 @@ import History from "./pages/History";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import ProductPage from "./pages/ProductPage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/product" element={<ProductPage />} />
             
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Index />} />
