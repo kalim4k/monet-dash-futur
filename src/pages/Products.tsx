@@ -23,12 +23,14 @@ interface Product {
   page_path: string;
 }
 
+type CopiedState = Record<string, boolean>;
+
 const Products = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState<Record<string, boolean>>({});
+  const [copied, setCopied] = useState<CopiedState>({});
 
   useEffect(() => {
     // Charger les produits avec des liens d'affiliation prédéfinis
@@ -92,7 +94,7 @@ const Products = () => {
             affiliate_link: "https://monet-dash-futur.lovable.app/tiktok-monetization",
             page_path: "/tiktok-monetization"
           }
-        ];
+        ] as Product[];
         
         if (!user) {
           setProducts(ourProducts);
