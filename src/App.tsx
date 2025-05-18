@@ -14,6 +14,7 @@ import Auth from "./pages/Auth";
 import ProductPage from "./pages/ProductPage";
 import PenisEnlargementPage from "./pages/PenisEnlargementPage";
 import TikTokMonetizationPage from "./pages/TikTokMonetizationPage";
+import PayPalAccountPage from "./pages/PayPalAccountPage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/product" element={<ProductPage />} />
             <Route path="/penis-enlargement" element={<PenisEnlargementPage />} />
             <Route path="/tiktok-monetization" element={<TikTokMonetizationPage />} />
+            <Route path="/paypal-account" element={<PayPalAccountPage />} />
             
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Index />} />
