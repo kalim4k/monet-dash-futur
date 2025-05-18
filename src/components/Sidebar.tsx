@@ -1,8 +1,12 @@
+
 import { cn } from "@/lib/utils";
 import { Home, Package, History, User, LogOut, Shield } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react"; // Importer useState et useEffect
+import { supabase } from "@/integrations/supabase/client"; // Importer supabase
+import { useAuth } from "@/contexts/AuthContext"; // Importer useAuth pour accéder à l'utilisateur
 
 interface SidebarItemProps {
   to: string;
@@ -32,6 +36,7 @@ export function Sidebar() {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [hasAdminRole, setHasAdminRole] = useState(false);
+  const { user } = useAuth(); // Obtenir l'utilisateur depuis le contexte d'authentification
 
   // Don't render on mobile (we'll use BottomNavigation instead)
   if (isMobile) {

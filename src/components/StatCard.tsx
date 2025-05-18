@@ -1,6 +1,6 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowUpRight } from "lucide-react"
-import { Sparkline } from "@/components/ui/sparkline"
 
 export function StatCard({
   title,

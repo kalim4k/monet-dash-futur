@@ -156,12 +156,12 @@ export const reviewClick = async (clickId: string, isValid: boolean) => {
           
         const payout = productData?.payout_per_click || 1;
         
-        // Mettre à jour les statistiques du lien d'affiliation
+        // Mettre à jour les statistiques du lien d'affiliation manuellement au lieu d'utiliser rpc
         await supabase
           .from('affiliate_links')
           .update({
-            total_clicks: supabase.rpc('decrement', { x: 1 }),
-            earnings: supabase.rpc('decrement', { x: payout })
+            total_clicks: supabase.sql`total_clicks - 1`,
+            earnings: supabase.sql`earnings - ${payout}`
           })
           .eq('id', clickData.affiliate_link_id);
       }
