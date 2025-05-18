@@ -22,62 +22,55 @@ const Index = () => {
   const { user } = useAuth();
   const [earnings, setEarnings] = useState({ total: 0, weekly: 0, clicks: 0, bonus: 0 });
   
-  // Fonction pour charger les statistiques de l'utilisateur
-  const loadUserStats = async (userId: string) => {
-    try {
-      // Récupérer les revenus totaux (1 FCFA par clic)
-      const { data: totalEarnings, error: totalError } = await supabase.rpc(
-        'get_affiliate_earnings', 
-        { user_id: userId }
-      );
+  // Utilisation de React Query pour charger les statistiques
+  const { data: userStats, isLoading, error, refetch } = useQuery({
+    queryKey: ['userStats', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
       
-      // Récupérer les revenus hebdomadaires (1 FCFA par clic)
-      const { data: weeklyEarnings, error: weeklyError } = await supabase.rpc(
-        'get_affiliate_weekly_earnings',
-        { user_id: userId }
-      );
-      
-      // Récupérer le nombre total de clics
-      const { data: clicksData, error: clicksError } = await supabase
+      // Récupérer les statistiques d'affiliation directement depuis la table affiliate_links
+      const { data: linksData, error: linksError } = await supabase
         .from('affiliate_links')
-        .select('id')
-        .eq('user_id', userId)
-        .then(async ({ data, error }) => {
-          if (error) throw error;
-          if (!data || data.length === 0) return { data: 0, error: null };
-          
-          const linkIds = data.map(link => link.id);
-          const { count, error: countError } = await supabase
-            .from('clicks')
-            .select('*', { count: 'exact', head: true })
-            .in('affiliate_link_id', linkIds);
-            
-          return { data: count || 0, error: countError };
-        });
+        .select('total_clicks, earnings')
+        .eq('user_id', user.id);
       
-      if (totalError || weeklyError || clicksError) {
-        throw new Error("Erreur lors du chargement des statistiques");
-      }
+      if (linksError) throw linksError;
       
-      setEarnings({
-        // 1 FCFA par clic
-        total: totalEarnings || 0, 
-        weekly: weeklyEarnings || 0,
-        clicks: clicksData || 0,
+      // Calculer les totaux
+      const totalClicks = linksData?.reduce((sum, link) => sum + (link.total_clicks || 0), 0) || 0;
+      const totalEarnings = linksData?.reduce((sum, link) => sum + (Number(link.earnings) || 0), 0) || 0;
+      
+      // Récupérer les clics de la semaine
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      
+      const { data: weeklyClicks, error: weeklyError } = await supabase
+        .from('clicks')
+        .select('affiliate_link_id, product_id, is_valid')
+        .gte('clicked_at', oneWeekAgo.toISOString())
+        .eq('is_valid', true)
+        .or(`affiliate_link_id.eq.${user.id},user_id.eq.${user.id}`);
+      
+      if (weeklyError) throw weeklyError;
+      
+      // Compter uniquement les clics valides
+      const validWeeklyClicks = weeklyClicks?.filter(click => click.is_valid).length || 0;
+      
+      return {
+        total: totalEarnings,
+        weekly: validWeeklyClicks, // 1 FCFA par clic
+        clicks: totalClicks,
         bonus: 0 // Pour le moment, pas de système de bonus
-      });
-      
-    } catch (error) {
-      console.error("Erreur lors du chargement des statistiques:", error);
-    }
-  };
+      };
+    },
+    enabled: !!user?.id
+  });
   
-  // Charger les statistiques si l'utilisateur est connecté
   useEffect(() => {
-    if (user?.id) {
-      loadUserStats(user.id);
+    if (userStats) {
+      setEarnings(userStats);
     }
-  }, [user]);
+  }, [userStats]);
   
   return (
     <div className="flex min-h-screen bg-[#f8fafc]">
@@ -108,23 +101,27 @@ const Index = () => {
               <StatCard
                 title="Gains Totaux"
                 value={`${earnings.total} FCFA`}
-                description={`1 FCFA par clic généré`}
+                description={`1 FCFA par clic validé`}
                 color="pink"
+                icon={TrendingUp}
               />
               <StatCard
                 title="Gains de la semaine"
                 value={`${earnings.weekly} FCFA`}
                 color="blue"
+                icon={ChevronUp}
               />
               <StatCard
                 title="Clics totaux générés"
                 value={earnings.clicks.toString()}
                 color="green"
+                icon={MousePointer}
               />
               <StatCard
                 title="Bonus Reçus"
                 value={`${earnings.bonus} FCFA`}
                 color="yellow"
+                icon={Award}
               />
             </div>
           </section>
