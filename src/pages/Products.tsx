@@ -111,22 +111,27 @@ const Products = () => {
           };
         });
         
-        // Récupérer les statistiques de clics pour chaque produit
+        // Récupérer les statistiques de clics pour chaque produit de façon plus simple
         const userClickStats = await Promise.all(
           productsWithUserLinks.map(async (product) => {
-            // Vérifie si des statistiques existent pour ce produit et cet utilisateur
-            const { count, error } = await supabase
-              .from('clicks')
-              .select('*', { count: 'exact', head: true })
-              .eq('affiliate_link_id', product.id)
-              .eq('user_id', user.id);
-            
-            if (error) {
-              console.error("Erreur lors du comptage des clics:", error);
+            try {
+              // Vérifie si des statistiques existent pour ce produit et cet utilisateur
+              const { count, error } = await supabase
+                .from('clicks')
+                .select('*', { count: 'exact', head: true })
+                .eq('affiliate_link_id', product.id)
+                .eq('user_id', user.id);
+              
+              if (error) {
+                console.error("Erreur lors du comptage des clics:", error);
+                return { ...product, clicks_count: 0 };
+              }
+              
+              return { ...product, clicks_count: count || 0 };
+            } catch (err) {
+              console.error("Erreur:", err);
               return { ...product, clicks_count: 0 };
             }
-            
-            return { ...product, clicks_count: count || 0 };
           })
         );
         
