@@ -2,60 +2,33 @@
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Obtient ou crée un lien d'affiliation pour un utilisateur et un produit
+ * Enregistre directement un clic sur un produit sans utiliser la table d'affiliation
  * @param productId Identifiant du produit
- * @param userId Identifiant de l'utilisateur affilié (optionnel)
- * @returns L'identifiant du lien d'affiliation ou null en cas d'erreur
+ * @param affiliateUserId Identifiant de l'utilisateur affilié (optionnel)
+ * @param visitorUserId Identifiant de l'utilisateur qui visite la page (optionnel)
+ * @returns Un objet indiquant le succès ou l'échec de l'opération
  */
-export const getOrCreateAffiliateLink = async (productId: string, userId?: string): Promise<string | null> => {
+export const recordProductClick = async (
+  productId: string, 
+  affiliateUserId?: string, 
+  visitorUserId?: string
+) => {
   try {
-    // Si aucun ID utilisateur n'est fourni, utiliser un ID système par défaut
-    const affiliateUserId = userId || "00000000-0000-0000-0000-000000000000"; // ID spécial pour le système
-    
-    console.log(`Création/récupération du lien d'affiliation pour le produit ${productId} et l'utilisateur ${affiliateUserId}`);
-    
-    // Appeler la fonction RPC pour obtenir ou créer un lien d'affiliation
-    const { data: affiliateLinkId, error } = await supabase.rpc('get_or_create_affiliate_link', {
-      _user_id: affiliateUserId,
-      _product_id: productId
-    });
-    
-    if (error) {
-      console.error("Erreur lors de la récupération du lien d'affiliation:", error);
-      return null;
-    }
-    
-    console.log(`Lien d'affiliation obtenu: ${affiliateLinkId}`);
-    return affiliateLinkId;
-  } catch (err) {
-    console.error("Exception lors de la récupération du lien d'affiliation:", err);
-    return null;
-  }
-};
-
-/**
- * Enregistre un clic sur un lien d'affiliation
- * @param affiliateLinkId Identifiant du lien d'affiliation
- * @param userId Identifiant de l'utilisateur qui a cliqué (optionnel)
- */
-export const recordClick = async (affiliateLinkId: string, userId?: string) => {
-  try {
-    // Vérifier que l'ID du lien d'affiliation est fourni
-    if (!affiliateLinkId) {
-      console.error("Erreur: ID de lien d'affiliation manquant");
-      return { success: false, error: "ID de lien d'affiliation manquant" };
+    if (!productId) {
+      console.error("Erreur: ID de produit manquant");
+      return { success: false, error: "ID de produit manquant" };
     }
     
     // Obtenir les informations du navigateur pour enrichir les données de clic
     const userAgent = navigator.userAgent;
     
-    console.log(`Enregistrement d'un clic pour le lien d'affiliation ${affiliateLinkId}`);
-
-    // Appeler la fonction RPC pour enregistrer le clic
-    const { data, error } = await supabase.rpc('record_affiliate_click', {
-      _affiliate_link_id: affiliateLinkId,
-      _user_id: userId || null,
-      _ip_address: null, // Pour des raisons de confidentialité, ne pas stocker l'IP côté client
+    console.log(`Enregistrement direct d'un clic pour le produit ${productId}`);
+    
+    // Appeler la fonction RPC pour enregistrer le clic directement
+    const { data, error } = await supabase.rpc('record_product_click', {
+      _product_id: productId,
+      _affiliate_user_id: affiliateUserId || null,
+      _visitor_user_id: visitorUserId || null,
       _user_agent: userAgent
     });
     

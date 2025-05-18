@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { getAffiliateParamsFromUrl, getOrCreateAffiliateLink, recordClick } from "@/services/trackingService";
+import { getAffiliateParamsFromUrl, recordProductClick } from "@/services/trackingService";
 import { useAuth } from "@/contexts/AuthContext";
 
 /**
@@ -23,7 +23,7 @@ export const useTracking = (productId: string) => {
         // Vérifier si l'utilisateur vient d'un lien d'affiliation
         const { refId } = getAffiliateParamsFromUrl();
         
-        // Utiliser l'ID affilié de l'URL ou un ID système par défaut si aucun refId n'est présent
+        // Utiliser l'ID affilié de l'URL si présent
         const affiliateUserId = refId || null;
         console.log(`Traitement du clic pour le produit ${productId}${affiliateUserId ? ` référé par ${affiliateUserId}` : ' (visite directe)'}`);
         
@@ -36,23 +36,21 @@ export const useTracking = (productId: string) => {
           return;
         }
         
-        // Obtenir ou créer le lien d'affiliation pour l'utilisateur référant ou le système
-        const affiliateLinkId = await getOrCreateAffiliateLink(productId, affiliateUserId);
+        // Enregistrer directement le clic sur le produit
+        const result = await recordProductClick(
+          productId,
+          affiliateUserId,
+          user?.id
+        );
         
-        if (affiliateLinkId) {
-          const result = await recordClick(affiliateLinkId, user?.id);
+        if (result.success) {
+          console.log("Clic comptabilisé avec succès");
+          setIsTracked(true);
           
-          if (result.success) {
-            console.log("Clic comptabilisé avec succès");
-            setIsTracked(true);
-            
-            // Stocker en session que ce clic a déjà été comptabilisé
-            sessionStorage.setItem(trackingKey, 'true');
-          } else {
-            console.error("Échec de l'enregistrement du clic:", result.error);
-          }
+          // Stocker en session que ce clic a déjà été comptabilisé
+          sessionStorage.setItem(trackingKey, 'true');
         } else {
-          console.error("Impossible d'obtenir un lien d'affiliation pour ce produit et cet utilisateur");
+          console.error("Échec de l'enregistrement du clic:", result.error);
         }
       } catch (error) {
         console.error("Erreur lors du suivi de la page:", error);

@@ -43,26 +43,29 @@ export type Database = {
       }
       clicks: {
         Row: {
-          affiliate_link_id: string
+          affiliate_link_id: string | null
           clicked_at: string
           id: string
           ip_address: string | null
+          product_id: string | null
           user_agent: string | null
           user_id: string | null
         }
         Insert: {
-          affiliate_link_id: string
+          affiliate_link_id?: string | null
           clicked_at?: string
           id?: string
           ip_address?: string | null
+          product_id?: string | null
           user_agent?: string | null
           user_id?: string | null
         }
         Update: {
-          affiliate_link_id?: string
+          affiliate_link_id?: string | null
           clicked_at?: string
           id?: string
           ip_address?: string | null
+          product_id?: string | null
           user_agent?: string | null
           user_id?: string | null
         }
@@ -72,6 +75,13 @@ export type Database = {
             columns: ["affiliate_link_id"]
             isOneToOne: false
             referencedRelation: "affiliate_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clicks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -231,6 +241,15 @@ export type Database = {
               _ip_address: string
               _user_agent: string
             }
+        Returns: string
+      }
+      record_product_click: {
+        Args: {
+          _product_id: string
+          _affiliate_user_id: string
+          _visitor_user_id: string
+          _user_agent: string
+        }
         Returns: string
       }
     }
