@@ -8,7 +8,8 @@ import { toast } from "@/hooks/use-toast";
 const BOT_USER_AGENTS = [
   'bot', 'crawler', 'spider', 'googlebot', 'bingbot', 'slurp',
   'duckduckbot', 'baiduspider', 'yandexbot', 'sogou', 'exabot',
-  'facebookexternalhit', 'ia_archiver'
+  'facebookexternalhit', 'ia_archiver', 'semrushbot', 'ahrefsbot',
+  'mj12bot', 'dotbot', 'rogerbot', 'yandexbot', 'sistrix'
 ];
 
 /**
@@ -17,8 +18,32 @@ const BOT_USER_AGENTS = [
  * @returns True si c'est probablement un bot, false sinon
  */
 export const isLikelyBot = (userAgent: string): boolean => {
+  if (!userAgent) return false;
+  
   const lowerCaseUA = userAgent.toLowerCase();
   return BOT_USER_AGENTS.some(botUA => lowerCaseUA.includes(botUA));
+};
+
+/**
+ * Récupère l'adresse IP de l'utilisateur via un service externe
+ * @returns Promise contenant l'adresse IP ou null en cas d'échec
+ */
+export const getUserIP = async (): Promise<string | null> => {
+  try {
+    // Utiliser un service API public pour obtenir l'IP
+    const response = await fetch('https://api.ipify.org?format=json');
+    
+    if (!response.ok) {
+      console.error("Échec de récupération de l'IP:", response.statusText);
+      return null;
+    }
+    
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error("Erreur lors de la récupération de l'IP:", error);
+    return null;
+  }
 };
 
 /**
@@ -55,7 +80,12 @@ export const recordProductClick = async (
       return { success: false, error: "Bot detected" };
     }
     
-    console.log(`Enregistrement d'un clic pour le produit ${productId}${affiliateUserId ? ` via l'affilié ${affiliateUserId}` : ''}`);
+    // Obtenir l'adresse IP pour une meilleure protection anti-fraude
+    const ipAddress = await getUserIP();
+    
+    console.log(`Enregistrement d'un clic pour le produit ${productId}${
+      affiliateUserId ? ` via l'affilié ${affiliateUserId}` : ''
+    } (IP: ${ipAddress || 'inconnue'})`);
     
     // Vérifier si ce visiteur a déjà cliqué sur ce produit récemment (dans la session)
     const sessionKey = `click_${productId}_${affiliateUserId || 'direct'}_time`;
@@ -76,7 +106,8 @@ export const recordProductClick = async (
       _product_id: productId,
       _affiliate_user_id: affiliateUserId || null,
       _visitor_user_id: visitorUserId || null,
-      _user_agent: userAgent
+      _user_agent: userAgent,
+      _ip_address: ipAddress
     });
     
     if (error) {
@@ -103,6 +134,7 @@ export const getAffiliateParamsFromUrl = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const refId = urlParams.get('ref');
   
+  console.log("Paramètres d'affiliation extraits:", { refId });
   return {
     refId
   };
@@ -119,6 +151,8 @@ export const getUserClicksHistory = async (userId: string) => {
       return { success: false, error: "ID utilisateur manquant" };
     }
     
+    console.log(`Récupération de l'historique des clics pour l'utilisateur ${userId}`);
+    
     // Récupérer les clics où cet utilisateur est l'affilié
     const { data, error } = await supabase
       .from('clicks')
@@ -126,9 +160,10 @@ export const getUserClicksHistory = async (userId: string) => {
         id,
         clicked_at,
         is_valid,
-        product:product_id (name, image_url)
+        product:product_id (name, image_url),
+        affiliate_link:affiliate_link_id (user_id)
       `)
-      .eq('affiliate_link_id', userId)
+      .eq('affiliate_link.user_id', userId)
       .order('clicked_at', { ascending: false });
       
     if (error) {
@@ -136,6 +171,7 @@ export const getUserClicksHistory = async (userId: string) => {
       return { success: false, error };
     }
     
+    console.log("Données des clics récupérées:", data);
     return { success: true, data };
   } catch (err) {
     console.error("Exception lors de la récupération de l'historique des clics:", err);

@@ -6,7 +6,7 @@ import { toast } from "@/hooks/use-toast";
 
 /**
  * Hook pour gérer le suivi des clics sur les pages de produits
- * @param productId Identifiant du produit
+ * @param productId Identifiant du produit (format UUID)
  */
 export const useTracking = (productId: string) => {
   const [isTracked, setIsTracked] = useState(false);
@@ -16,7 +16,10 @@ export const useTracking = (productId: string) => {
   
   // Fonction pour tracer manuellement un clic (utile pour les boutons d'action)
   const trackClick = useCallback(async () => {
-    if (isProcessing || !productId) return;
+    if (isProcessing || !productId) {
+      console.log(`Tracking ignoré: ${isProcessing ? 'déjà en cours' : 'ID produit manquant'}`);
+      return;
+    }
     
     setIsProcessing(true);
     setError(null);
@@ -49,11 +52,22 @@ export const useTracking = (productId: string) => {
         if (result.error === "Duplicate click") {
           console.log("Ce clic a déjà été comptabilisé récemment");
           setIsTracked(true);
+        } else if (result.error === "Bot detected") {
+          console.warn("Clic ignoré: détecté comme bot");
+        } else if (typeof result.error === 'object') {
+          console.error("Erreur détaillée lors de l'enregistrement du clic:", result.error);
+          setError("Erreur technique lors de l'enregistrement du clic");
+          
+          toast({
+            title: "Erreur technique",
+            description: "Impossible d'enregistrer votre interaction. Veuillez réessayer plus tard.",
+            variant: "destructive"
+          });
         } else {
           console.error("Échec de l'enregistrement du clic:", result.error);
           setError(typeof result.error === 'string' ? result.error : 'Erreur lors de l\'enregistrement du clic');
           
-          // Afficher une notification d'erreur seulement pour les erreurs techniques, pas pour les clics dupliqués
+          // Afficher une notification d'erreur seulement pour les erreurs techniques, pas pour les filtres normaux
           if (result.error !== "Bot detected" && result.error !== "Duplicate click") {
             toast({
               title: "Erreur",
@@ -80,7 +94,18 @@ export const useTracking = (productId: string) => {
   useEffect(() => {
     const trackPageView = async () => {
       // Ne traquer qu'une seule fois par chargement de page et seulement si un ID de produit valide est fourni
-      if (isTracked || isProcessing || !productId) return;
+      if (isTracked || isProcessing || !productId) {
+        console.log(`Tracking automatique ignoré: ${isTracked ? 'déjà tracké' : isProcessing ? 'en cours' : 'ID produit manquant'}`);
+        return;
+      }
+      
+      // Vérifier que l'ID du produit est un UUID valide
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(productId)) {
+        console.error(`Erreur: ID de produit invalide pour le tracking automatique (${productId})`);
+        setError("ID de produit invalide");
+        return;
+      }
       
       setIsProcessing(true);
       
