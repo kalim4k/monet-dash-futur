@@ -1,5 +1,5 @@
 
-import { ArrowUpRight, ChevronUp, Award, MousePointer, TrendingUp, User } from "lucide-react";
+import { ArrowUpRight, ChevronUp, Award, MousePointer, TrendingUp, User, CreditCard, DollarSign, Activity } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ClicksPerProductChart } from "@/components/ClicksPerProductChart";
 import { WeeklyEarnings } from "@/components/WeeklyEarnings";
@@ -7,7 +7,7 @@ import { TopAffiliatesTable } from "@/components/TopAffiliatesTable";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PlatformsCarousel } from "@/components/PlatformsCarousel";
 import { UserProfileCard } from "@/components/UserProfileCard";
@@ -16,6 +16,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const isMobile = useIsMobile();
@@ -50,7 +52,7 @@ const Index = () => {
           const { count, error: countError } = await supabase
             .from('clicks')
             .select('*', { count: 'exact', head: true })
-            .in('affiliate_link_id', linkIds);
+            .in('affiliate_link_id', linkIds as string[]);
             
           return { data: count || 0, error: countError };
         });
@@ -80,17 +82,20 @@ const Index = () => {
   }, [user]);
   
   return (
-    <div className="flex min-h-screen bg-[#f8fafc]">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <Sidebar />
       
       <main className="flex-1 pb-16 md:pb-0 w-full">
         <div className="container px-4 sm:px-6 max-w-7xl py-6">
-          <header className="mb-8">
+          {/* Header amélioré */}
+          <header className="mb-8 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div className={isMobile ? "flex-1" : ""}>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Tableau de bord</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Tableau de bord
+                </h1>
                 <p className="text-muted-foreground mt-1">
-                  Bienvenue sur votre tableau de bord de monétisation de vos réseaux sociaux
+                  Bienvenue sur votre tableau de bord de monétisation
                 </p>
               </div>
               
@@ -102,43 +107,125 @@ const Index = () => {
             <PlatformsCarousel />
           </header>
           
-          <section>
-            <h2 className="text-xl font-semibold mb-4">Résumé des Gains</h2>
-            <div className="grid gap-4 grid-cols-2 sm:grid-cols-2">
-              <StatCard
-                title="Gains Totaux"
-                value={`${earnings.total} FCFA`}
-                description={`1 FCFA par clic généré`}
-                color="pink"
-              />
-              <StatCard
-                title="Gains de la semaine"
-                value={`${earnings.weekly} FCFA`}
-                color="blue"
-              />
-              <StatCard
-                title="Clics totaux générés"
-                value={earnings.clicks.toString()}
-                color="green"
-              />
-              <StatCard
-                title="Bonus Reçus"
-                value={`${earnings.bonus} FCFA`}
-                color="yellow"
-              />
+          {/* Section des gains avec design moderne */}
+          <section className="mb-8">
+            <h2 className="text-xl font-semibold mb-4 flex items-center">
+              <DollarSign className="mr-2 h-5 w-5 text-primary" />
+              Résumé des Gains
+            </h2>
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+              <Card className="overflow-hidden border-none shadow-md bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-sm font-medium text-pink-600 dark:text-pink-300">Gains Totaux</p>
+                      <h3 className="text-3xl font-bold mt-2">{earnings.total} FCFA</h3>
+                      <p className="text-xs text-muted-foreground mt-1">1 FCFA par clic généré</p>
+                    </div>
+                    <div className="h-10 w-10 bg-pink-200 dark:bg-pink-800/30 rounded-full flex items-center justify-center">
+                      <CreditCard className="h-5 w-5 text-pink-600 dark:text-pink-300" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="overflow-hidden border-none shadow-md bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-sm font-medium text-blue-600 dark:text-blue-300">Gains de la semaine</p>
+                      <h3 className="text-3xl font-bold mt-2">{earnings.weekly} FCFA</h3>
+                      <p className="text-xs text-muted-foreground mt-1">&nbsp;</p>
+                    </div>
+                    <div className="h-10 w-10 bg-blue-200 dark:bg-blue-800/30 rounded-full flex items-center justify-center">
+                      <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-300" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="overflow-hidden border-none shadow-md bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-sm font-medium text-green-600 dark:text-green-300">Clics générés</p>
+                      <h3 className="text-3xl font-bold mt-2">{earnings.clicks}</h3>
+                      <p className="text-xs text-muted-foreground mt-1">&nbsp;</p>
+                    </div>
+                    <div className="h-10 w-10 bg-green-200 dark:bg-green-800/30 rounded-full flex items-center justify-center">
+                      <MousePointer className="h-5 w-5 text-green-600 dark:text-green-300" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="overflow-hidden border-none shadow-md bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-sm font-medium text-yellow-600 dark:text-yellow-300">Bonus Reçus</p>
+                      <h3 className="text-3xl font-bold mt-2">{earnings.bonus} FCFA</h3>
+                      <p className="text-xs text-muted-foreground mt-1">&nbsp;</p>
+                    </div>
+                    <div className="h-10 w-10 bg-yellow-200 dark:bg-yellow-800/30 rounded-full flex items-center justify-center">
+                      <Award className="h-5 w-5 text-yellow-600 dark:text-yellow-300" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </section>
           
-          <section className="mt-10">
-            <h2 className="text-xl font-semibold mb-4">Statistiques de Performance</h2>
+          {/* Section des statistiques réorganisée */}
+          <section className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold flex items-center">
+                <Activity className="mr-2 h-5 w-5 text-primary" />
+                Statistiques de Performance
+              </h2>
+              <Button variant="outline" size="sm" className="text-xs">
+                Exporter <ArrowUpRight className="ml-1 h-3 w-3" />
+              </Button>
+            </div>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-              <WeeklyEarnings />
-              <ClicksPerProductChart />
+              <Card className="shadow-md border border-slate-200 dark:border-slate-700">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg font-medium">Gains de la Semaine</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <WeeklyEarnings />
+                </CardContent>
+              </Card>
+              
+              <Card className="shadow-md border border-slate-200 dark:border-slate-700">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg font-medium">Clics par Produit</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ClicksPerProductChart />
+                </CardContent>
+              </Card>
             </div>
           </section>
           
-          <section className="mt-10 mb-10">
-            <TopAffiliatesTable />
+          {/* Section Top Affiliés modernisée */}
+          <section className="mb-10">
+            <Card className="shadow-md border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <CardHeader className="pb-2 border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-medium flex items-center">
+                    <User className="mr-2 h-5 w-5 text-primary" />
+                    Top Affiliés
+                  </CardTitle>
+                  <Button variant="ghost" size="sm" className="text-xs">
+                    Voir tout
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <TopAffiliatesTable />
+              </CardContent>
+            </Card>
           </section>
         </div>
       </main>
