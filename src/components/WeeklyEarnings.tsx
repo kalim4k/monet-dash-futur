@@ -47,11 +47,11 @@ export function WeeklyEarnings() {
           <Tooltip 
             formatter={(value: number) => [`${formatNumber(value)} FCFA`, "Gains"]} 
             contentStyle={{ 
-              borderRadius: "0.5rem", 
+              borderRadius: "0.75rem", 
               boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-              border: "1px solid rgba(229, 231, 235, 1)",
-              padding: "8px 12px",
-              backgroundColor: "white"
+              border: "none",
+              padding: "10px 14px",
+              backgroundColor: "rgba(255, 255, 255, 0.95)"
             }}
             labelStyle={{ color: "#6B7280", fontWeight: "600", marginBottom: "4px" }}
             itemStyle={{ color: "hsl(var(--primary))", fontWeight: "600" }}
@@ -61,7 +61,7 @@ export function WeeklyEarnings() {
             dataKey="earnings" 
             name="Gains" 
             stroke="hsl(var(--primary))" 
-            strokeWidth={2}
+            strokeWidth={2.5}
             fill="url(#colorEarnings)" 
             activeDot={{ r: 6, strokeWidth: 0, fill: "hsl(var(--primary))" }}
           />
