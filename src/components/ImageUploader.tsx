@@ -24,35 +24,46 @@ export function ImageUploader({ userId, currentImageUrl, onImageUploaded }: Imag
     }
   }, [currentImageUrl]);
 
-  // Create bucket if it doesn't exist
-  const ensureBucketExists = async (): Promise<boolean> => {
+  // Check if the bucket exists and try to create it if not
+  const ensureBucketExists = async () => {
     try {
-      // Check if the bucket exists
-      const { data: buckets, error } = await supabase.storage.listBuckets();
+      // First check if the bucket exists
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
       
-      if (error) {
-        console.error("Error checking buckets:", error);
+      if (bucketsError) {
+        console.error("Error checking buckets:", bucketsError);
         return false;
       }
       
-      // If the bucket doesn't exist, create it
-      if (!buckets?.find(bucket => bucket.name === 'avatars')) {
-        const { error: createError } = await supabase.storage.createBucket('avatars', {
-          public: true,
-          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif'],
-          fileSizeLimit: 2097152, // 2MB in bytes
-        });
+      const bucketExists = buckets?.some(bucket => bucket.name === 'avatars');
+      
+      // If bucket doesn't exist, try to create it
+      if (!bucketExists) {
+        console.log("Avatars bucket not found, attempting to create it...");
         
-        if (createError) {
-          console.error("Error creating bucket:", createError);
+        try {
+          const { error: createError } = await supabase.storage.createBucket('avatars', {
+            public: true,
+            allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif'],
+            fileSizeLimit: 2097152, // 2MB
+          });
+          
+          if (createError) {
+            console.error("Failed to create avatars bucket:", createError);
+            return false;
+          }
+          
+          console.log("Successfully created avatars bucket");
+          return true;
+        } catch (createError) {
+          console.error("Exception creating bucket:", createError);
           return false;
         }
-        console.log('Bucket "avatars" created successfully');
       }
       
       return true;
     } catch (error) {
-      console.error("Failed to ensure bucket exists:", error);
+      console.error("Exception in ensureBucketExists:", error);
       return false;
     }
   };
@@ -91,21 +102,24 @@ export function ImageUploader({ userId, currentImageUrl, onImageUploaded }: Imag
     try {
       setIsUploading(true);
       
+      // First make sure the bucket exists
+      const bucketExists = await ensureBucketExists();
+      if (!bucketExists) {
+        throw new Error("Impossible de créer ou d'accéder au bucket de stockage. Veuillez réessayer plus tard.");
+      }
+      
       // Create a unique file path
       const fileExt = file.name.split('.').pop();
       const filePath = `${userId}/${Date.now()}.${fileExt}`;
       
-      // Ensure the bucket exists before uploading
-      const bucketExists = await ensureBucketExists();
-      if (!bucketExists) {
-        throw new Error("Impossible de créer ou d'accéder au bucket de stockage");
-      }
-
       // Delete old avatar if exists
       if (currentImageUrl) {
         try {
           const urlParts = currentImageUrl.split('/');
+          // Extract just the filename without the path
           const oldFileName = urlParts[urlParts.length - 1];
+          
+          console.log(`Attempting to delete old avatar: ${userId}/${oldFileName}`);
           
           const { error: deleteError } = await supabase.storage
             .from('avatars')
@@ -113,13 +127,16 @@ export function ImageUploader({ userId, currentImageUrl, onImageUploaded }: Imag
           
           if (deleteError) {
             console.log("Error removing old avatar:", deleteError);
+            // Continue even if deletion fails
           }
         } catch (error) {
           console.log("Failed to delete old avatar:", error);
+          // Continue even if deletion fails
         }
       }
 
       // Upload the new file
+      console.log(`Uploading new avatar to: ${filePath}`);
       const { data, error } = await supabase.storage
         .from('avatars')
         .upload(filePath, file, {
@@ -136,6 +153,8 @@ export function ImageUploader({ userId, currentImageUrl, onImageUploaded }: Imag
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
+      
+      console.log(`Avatar uploaded successfully, public URL: ${publicUrl}`);
       
       // Update user profile in the database
       const { error: updateError } = await supabase
@@ -182,6 +201,8 @@ export function ImageUploader({ userId, currentImageUrl, onImageUploaded }: Imag
       // Extract filename from URL
       const urlParts = currentImageUrl.split('/');
       const fileName = urlParts[urlParts.length - 1];
+      
+      console.log(`Removing image: ${userId}/${fileName}`);
       
       // Delete from storage
       const { error } = await supabase.storage
