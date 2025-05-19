@@ -185,7 +185,7 @@ const Index = () => {
             </div>
           </section>
           
-          {/* Section des statistiques réorganisée */}
+          {/* Section des statistiques réorganisée avec graphiques */}
           <section className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold flex items-center">
@@ -197,14 +197,26 @@ const Index = () => {
               </Button>
             </div>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-              <Card className="shadow-md border border-slate-200 dark:border-slate-700">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-medium">Gains de la Semaine</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <WeeklyEarnings />
-                </CardContent>
-              </Card>
+              <div className="space-y-4">
+                <Card className="shadow-md border border-slate-200 dark:border-slate-700">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg font-medium">Gains de la Semaine</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <WeeklyEarnings />
+                  </CardContent>
+                </Card>
+                
+                {/* Graphique circulaire ajouté ici */}
+                <Card className="shadow-md border border-slate-200 dark:border-slate-700">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg font-medium">Répartition des Revenus</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ProductRevenuePieChart />
+                  </CardContent>
+                </Card>
+              </div>
               
               <Card className="shadow-md border border-slate-200 dark:border-slate-700">
                 <CardHeader className="pb-2">
@@ -214,17 +226,6 @@ const Index = () => {
                   <ClicksPerProductChart />
                 </CardContent>
               </Card>
-            </div>
-          </section>
-          
-          {/* Nouvelle section pour le graphique circulaire des revenus par produit */}
-          <section className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <CreditCard className="mr-2 h-5 w-5 text-primary" />
-              Répartition des Revenus
-            </h2>
-            <div className="grid gap-4 grid-cols-1">
-              <ProductRevenuePieChart />
             </div>
           </section>
           
