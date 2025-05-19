@@ -102,12 +102,12 @@ export const recordProductClick = async (
     }
     
     // Appeler la fonction RPC pour enregistrer le clic directement
+    // Note: Removing the _ip_address parameter as it's not accepted by the function
     const { data, error } = await supabase.rpc('record_product_click', {
       _product_id: productId,
       _affiliate_user_id: affiliateUserId || null,
       _visitor_user_id: visitorUserId || null,
-      _user_agent: userAgent,
-      _ip_address: ipAddress
+      _user_agent: userAgent
     });
     
     if (error) {
