@@ -133,20 +133,25 @@ export function ProductRevenuePieChart() {
     }).format(value);
   };
 
-  // Custom render for the legend
+  // Modified to show truncated product names if they are too long
   const renderLegend = () => {
     return (
-      <div className="flex flex-wrap justify-center gap-3 mt-4 text-xs">
-        {productRevenue.map((entry, index) => (
-          <div key={`legend-${index}`} className="flex items-center">
-            <div 
-              className="w-3 h-3 rounded-full mr-1" 
-              style={{ backgroundColor: entry.color }}
-            />
-            <span className="text-gray-700 dark:text-gray-300 mr-1">{entry.name}</span>
-            <span className="font-semibold">{formatPercent(entry.value)}</span>
-          </div>
-        ))}
+      <div className="flex flex-wrap justify-center gap-2 mt-3 text-xs max-h-28 overflow-y-auto px-1">
+        {productRevenue.map((entry, index) => {
+          // Tronquer le nom s'il est trop long
+          const displayName = entry.name.length > 12 ? entry.name.substring(0, 10) + '...' : entry.name;
+          
+          return (
+            <div key={`legend-${index}`} className="flex items-center bg-slate-50 dark:bg-slate-800 rounded-full px-2 py-1 mb-1">
+              <div 
+                className="w-2 h-2 rounded-full mr-1 flex-shrink-0" 
+                style={{ backgroundColor: entry.color }}
+              />
+              <span title={entry.name} className="text-gray-700 dark:text-gray-300 mr-1 truncate max-w-20">{displayName}</span>
+              <span className="font-semibold">{formatPercent(entry.value)}</span>
+            </div>
+          );
+        })}
       </div>
     );
   };
