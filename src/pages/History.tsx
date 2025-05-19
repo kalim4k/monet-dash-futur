@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { UserProfileCard } from "@/components/UserProfileCard";
@@ -10,13 +10,73 @@ import { generateMockPaymentHistory, generateMockPaymentMethods } from "@/lib/ut
 import { Wallet, FileText, Plus, ArrowDown, ArrowUp, Clock, DollarSign } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const History = () => {
-  // Initialiser le solde à zéro au lieu de 4080
-  const [balance, setBalance] = useState<number>(0);
+  const { user } = useAuth();
+  // État pour les gains et les statistiques de l'utilisateur
+  const [earnings, setEarnings] = useState({ total: 0, weekly: 0, clicks: 0, bonus: 0 });
   // Tableau vide pour les transactions au lieu de générer des fausses
   const [transactions, setTransactions] = useState<PaymentHistoryItem[]>([]);
   const savedPaymentMethods = generateMockPaymentMethods();
+
+  // Chargement des statistiques utilisateur depuis Supabase
+  const loadUserStats = async (userId: string) => {
+    try {
+      // Récupérer les revenus totaux (1 FCFA par clic)
+      const { data: totalEarnings, error: totalError } = await supabase.rpc(
+        'get_affiliate_earnings', 
+        { user_id: userId }
+      );
+      
+      // Récupérer les revenus hebdomadaires (1 FCFA par clic)
+      const { data: weeklyEarnings, error: weeklyError } = await supabase.rpc(
+        'get_affiliate_weekly_earnings',
+        { user_id: userId }
+      );
+      
+      // Récupérer le nombre total de clics
+      const { data: clicksData, error: clicksError } = await supabase
+        .from('affiliate_links')
+        .select('id')
+        .eq('user_id', userId)
+        .then(async ({ data, error }) => {
+          if (error) throw error;
+          if (!data || data.length === 0) return { data: 0, error: null };
+          
+          const linkIds = data.map(link => link.id);
+          const { count, error: countError } = await supabase
+            .from('clicks')
+            .select('*', { count: 'exact', head: true })
+            .in('affiliate_link_id', linkIds as string[]);
+            
+          return { data: count || 0, error: countError };
+        });
+      
+      if (totalError || weeklyError || clicksError) {
+        throw new Error("Erreur lors du chargement des statistiques");
+      }
+      
+      setEarnings({
+        // 1 FCFA par clic
+        total: totalEarnings || 0, 
+        weekly: weeklyEarnings || 0,
+        clicks: clicksData || 0,
+        bonus: 0 // Pour le moment, pas de système de bonus
+      });
+      
+    } catch (error) {
+      console.error("Erreur lors du chargement des statistiques:", error);
+    }
+  };
+  
+  // Charger les statistiques si l'utilisateur est connecté
+  useEffect(() => {
+    if (user?.id) {
+      loadUserStats(user.id);
+    }
+  }, [user]);
 
   // Handle withdrawal submission
   const handleWithdrawal = (data: any) => {
@@ -32,7 +92,7 @@ const History = () => {
 
     // Update transactions and balance
     setTransactions([newTransaction, ...transactions]);
-    setBalance(prev => prev - data.amount);
+    setEarnings(prev => ({ ...prev, total: prev.total - data.amount }));
   };
 
   // Format currency function
@@ -44,7 +104,7 @@ const History = () => {
     }).format(amount);
   };
 
-  const totalIncome = 0; // Placeholder for total income
+  const totalIncome = earnings.total; // Utiliser le total des gains disponibles
   const totalWithdrawal = transactions.reduce((sum, tx) => sum + tx.amount, 0);
   const pendingAmount = transactions.filter(tx => tx.status === "pending").reduce((sum, tx) => sum + tx.amount, 0);
 
@@ -71,7 +131,7 @@ const History = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{formatCurrency(balance)}</div>
+                <div className="text-3xl font-bold">{formatCurrency(earnings.total)}</div>
                 <p className="text-xs opacity-80 mt-1">
                   Minimum de retrait: 50,000 FCFA
                 </p>
@@ -147,7 +207,7 @@ const History = () => {
                 </TabsContent>
                 
                 <TabsContent value="withdraw" className="mt-0">
-                  <WithdrawalForm balance={balance} savedMethods={savedPaymentMethods} onSubmit={handleWithdrawal} />
+                  <WithdrawalForm balance={earnings.total} savedMethods={savedPaymentMethods} onSubmit={handleWithdrawal} />
                 </TabsContent>
               </div>
             </Tabs>
