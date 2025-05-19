@@ -7,11 +7,13 @@ import { PlatformsCarousel } from "@/components/PlatformsCarousel";
 import { PaymentHistoryTable, PaymentHistoryItem } from "@/components/PaymentHistoryTable";
 import { WithdrawalForm } from "@/components/WithdrawalForm";
 import { generateMockPaymentHistory, generateMockPaymentMethods } from "@/lib/utils";
-import { Wallet, FileText, Plus, ArrowDown, ArrowUp, Clock, DollarSign } from "lucide-react";
+import { Wallet, FileText, Plus, ArrowDown, ArrowUp, Clock, DollarSign, ChartPie } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { WeeklyEarnings } from "@/components/WeeklyEarnings";
+import { ProductRevenuePieChart } from "@/components/ProductRevenuePieChart";
 
 const History = () => {
   const { user } = useAuth();
@@ -185,6 +187,24 @@ const History = () => {
                 </p>
               </CardContent>
             </Card>
+          </div>
+          
+          {/* Charts Section */}
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mb-8">
+            <Card className="shadow-md border border-slate-200 dark:border-slate-700">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-medium flex items-center">
+                  <DollarSign className="h-5 w-5 mr-2 text-primary" />
+                  Gains de la Semaine
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <WeeklyEarnings />
+              </CardContent>
+            </Card>
+            
+            {/* New Product Revenue Pie Chart */}
+            <ProductRevenuePieChart />
           </div>
           
           {/* Tabs for History and Withdrawal */}
