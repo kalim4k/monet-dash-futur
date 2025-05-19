@@ -15,23 +15,19 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   }
 });
 
-// Création du bucket s'il n'existe pas encore (exécuté une seule fois)
-const initStorageBucket = async () => {
+// Vérification silencieuse si le bucket existe - pas de création
+// Nous laissons l'administrateur créer les buckets via la console ou des migrations
+const checkStorageBucket = async () => {
   try {
-    const { data: buckets } = await supabase.storage.listBuckets();
+    const { data: buckets, error } = await supabase.storage.listBuckets();
     
-    if (!buckets?.find(bucket => bucket.name === 'avatars')) {
-      await supabase.storage.createBucket('avatars', {
-        public: true,
-        allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif'],
-        fileSizeLimit: 2097152, // 2MB in bytes
-      });
-      console.log('Bucket "avatars" created successfully');
+    if (!error && buckets) {
+      console.log("Storage buckets vérifiés avec succès");
     }
   } catch (error) {
-    console.error('Error initializing storage bucket:', error);
+    console.error('Erreur lors de la vérification des buckets:', error);
   }
 };
 
-// Exécuter au chargement
-initStorageBucket();
+// Exécuter la vérification au chargement
+checkStorageBucket();

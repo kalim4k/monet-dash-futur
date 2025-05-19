@@ -24,50 +24,6 @@ export function ImageUploader({ userId, currentImageUrl, onImageUploaded }: Imag
     }
   }, [currentImageUrl]);
 
-  // Check if the bucket exists and try to create it if not
-  const ensureBucketExists = async () => {
-    try {
-      // First check if the bucket exists
-      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-      
-      if (bucketsError) {
-        console.error("Error checking buckets:", bucketsError);
-        return false;
-      }
-      
-      const bucketExists = buckets?.some(bucket => bucket.name === 'avatars');
-      
-      // If bucket doesn't exist, try to create it
-      if (!bucketExists) {
-        console.log("Avatars bucket not found, attempting to create it...");
-        
-        try {
-          const { error: createError } = await supabase.storage.createBucket('avatars', {
-            public: true,
-            allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif'],
-            fileSizeLimit: 2097152, // 2MB
-          });
-          
-          if (createError) {
-            console.error("Failed to create avatars bucket:", createError);
-            return false;
-          }
-          
-          console.log("Successfully created avatars bucket");
-          return true;
-        } catch (createError) {
-          console.error("Exception creating bucket:", createError);
-          return false;
-        }
-      }
-      
-      return true;
-    } catch (error) {
-      console.error("Exception in ensureBucketExists:", error);
-      return false;
-    }
-  };
-
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -102,12 +58,6 @@ export function ImageUploader({ userId, currentImageUrl, onImageUploaded }: Imag
     try {
       setIsUploading(true);
       
-      // First make sure the bucket exists
-      const bucketExists = await ensureBucketExists();
-      if (!bucketExists) {
-        throw new Error("Impossible de créer ou d'accéder au bucket de stockage. Veuillez réessayer plus tard.");
-      }
-      
       // Create a unique file path
       const fileExt = file.name.split('.').pop();
       const filePath = `${userId}/${Date.now()}.${fileExt}`;
@@ -115,8 +65,8 @@ export function ImageUploader({ userId, currentImageUrl, onImageUploaded }: Imag
       // Delete old avatar if exists
       if (currentImageUrl) {
         try {
+          // Extract user ID and filename from URL
           const urlParts = currentImageUrl.split('/');
-          // Extract just the filename without the path
           const oldFileName = urlParts[urlParts.length - 1];
           
           console.log(`Attempting to delete old avatar: ${userId}/${oldFileName}`);
