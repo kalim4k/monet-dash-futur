@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -190,8 +189,8 @@ const Products = () => {
           </header>
           
           {loading ? (
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {[...Array(5)].map((_, i) => (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[...Array(3)].map((_, i) => (
                 <Card key={i} className="overflow-hidden">
                   <Skeleton className="h-48 w-full" />
                   <CardHeader>
@@ -205,7 +204,7 @@ const Products = () => {
               ))}
             </div>
           ) : (
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {products.length > 0 ? (
                 products.map((product) => (
                   <Card key={product.id} className="border overflow-hidden">

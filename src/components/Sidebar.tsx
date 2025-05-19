@@ -1,9 +1,12 @@
 
 import { cn } from "@/lib/utils";
-import { Home, Package, History, User, LogOut } from "lucide-react";
+import { Home, Package, History, User, LogOut, Shield } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react"; // Importer useState et useEffect
+import { supabase } from "@/integrations/supabase/client"; // Importer supabase
+import { useAuth } from "@/contexts/AuthContext"; // Importer useAuth pour accéder à l'utilisateur
 
 interface SidebarItemProps {
   to: string;
@@ -32,11 +35,34 @@ function SidebarItem({ to, icon, label, isActive }: SidebarItemProps) {
 export function Sidebar() {
   const location = useLocation();
   const isMobile = useIsMobile();
+  const [hasAdminRole, setHasAdminRole] = useState(false);
+  const { user } = useAuth(); // Obtenir l'utilisateur depuis le contexte d'authentification
 
   // Don't render on mobile (we'll use BottomNavigation instead)
   if (isMobile) {
     return null;
   }
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const { data, error } = await supabase.rpc('has_role', {
+          _user_id: user.id,
+          _role: 'admin'
+        });
+        
+        if (!error && data === true) {
+          setHasAdminRole(true);
+        }
+      } catch (error) {
+        console.error("Erreur lors de la vérification du rôle:", error);
+      }
+    };
+    
+    checkAdminStatus();
+  }, [user]);
 
   return (
     <div className="h-screen sticky top-0 w-64 bg-black border-r border-white/10 p-4 flex flex-col">
@@ -70,6 +96,14 @@ export function Sidebar() {
           label="Profile"
           isActive={location.pathname === "/profile"}
         />
+        {hasAdminRole && (
+          <SidebarItem
+            to="/click-review"
+            icon={<Shield size={20} className="text-white" />}
+            label="Revue des Clics"
+            isActive={location.pathname === "/click-review"}
+          />
+        )}
       </div>
 
       <div className="mt-auto pt-4 border-t border-white/10">
