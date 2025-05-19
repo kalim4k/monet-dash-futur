@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -108,35 +109,99 @@ const Products = () => {
           };
         });
         
-        const userClickStats: Product[] = [];
-        
-        // Parcourir chaque produit et récupérer ses statistiques de clics
-        for (const product of productsWithUserLinks) {
+        // Récupérer les données de clics pour tous les produits en une seule requête
+        const fetchClickCounts = async () => {
           try {
-            console.log(`Récupération des clics pour le produit ${product.id} de l'utilisateur ${user.id}`);
-            
-            // Requête pour compter les clics du produit spécifique pour cet utilisateur
-            const { count, error } = await supabase
-              .from('clicks')
-              .select('*', { count: 'exact', head: true })
-              .eq('affiliate_link_id', product.id)
+            // Récupérer tous les liens d'affiliation de l'utilisateur
+            const { data: affiliateLinks, error: linksError } = await supabase
+              .from('affiliate_links')
+              .select('id, product_id')
               .eq('user_id', user.id);
-            
-            if (error) {
-              console.error("Erreur lors du comptage des clics:", error);
-              userClickStats.push({ ...product, clicks_count: 0 });
-            } else {
-              console.log(`Produit ${product.id}: ${count || 0} clics trouvés`);
-              userClickStats.push({ ...product, clicks_count: count || 0 });
+              
+            if (linksError || !affiliateLinks) {
+              console.error("Erreur lors de la récupération des liens d'affiliation:", linksError);
+              return productsWithUserLinks.map(p => ({ ...p, clicks_count: 0 }));
             }
+            
+            // Créer un mapping des IDs de produits vers leurs liens d'affiliation
+            const productToLinkMap = affiliateLinks.reduce((map, link) => {
+              map[link.product_id] = link.id;
+              return map;
+            }, {});
+            
+            // Si aucun lien d'affiliation n'existe encore, retourner des compteurs à zéro
+            if (affiliateLinks.length === 0) {
+              return productsWithUserLinks.map(p => ({ ...p, clicks_count: 0 }));
+            }
+            
+            // Récupérer les compteurs de clics pour tous les liens d'affiliation en une requête
+            const linkIds = affiliateLinks.map(link => link.id);
+            const { data: clicksData, error: clicksError } = await supabase
+              .from('clicks')
+              .select('affiliate_link_id, count')
+              .in('affiliate_link_id', linkIds)
+              .eq('is_valid', true)
+              .then(async ({ data, error }) => {
+                if (error) return { data: null, error };
+                
+                // Compter manuellement les clics par lien d'affiliation
+                const counts = {};
+                if (data && data.length > 0) {
+                  // Compter les clics par lien d'affiliation
+                  data.forEach(click => {
+                    if (!counts[click.affiliate_link_id]) {
+                      counts[click.affiliate_link_id] = 0;
+                    }
+                    counts[click.affiliate_link_id]++;
+                  });
+                }
+                
+                return { data: counts, error: null };
+              });
+              
+            if (clicksError) {
+              console.error("Erreur lors de la récupération des compteurs de clics:", clicksError);
+              return productsWithUserLinks.map(p => ({ ...p, clicks_count: 0 }));
+            }
+            
+            // Mettre à jour les produits avec leurs compteurs de clics
+            return productsWithUserLinks.map(product => {
+              const affiliateLinkId = productToLinkMap[product.id];
+              const clickCount = affiliateLinkId && clicksData ? (clicksData[affiliateLinkId] || 0) : 0;
+              return {
+                ...product,
+                clicks_count: clickCount
+              };
+            });
           } catch (err) {
-            console.error("Erreur lors de la récupération des clics:", err);
-            userClickStats.push({ ...product, clicks_count: 0 });
+            console.error("Erreur lors du traitement des clics:", err);
+            return productsWithUserLinks.map(p => ({ ...p, clicks_count: 0 }));
           }
-        }
+        };
         
-        setProducts(userClickStats);
+        // Utiliser la méthode optimisée pour récupérer tous les compteurs de clics
+        const productsWithClicks = await fetchClickCounts();
         
+        // Configurer un canal pour les mises à jour en temps réel
+        const clicksChannel = supabase
+          .channel('product-clicks')
+          .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public',
+            table: 'clicks'
+          }, payload => {
+            // Lorsqu'un nouveau clic est enregistré, mettre à jour les produits
+            fetchClickCounts().then(updatedProducts => {
+              setProducts(updatedProducts);
+            });
+          })
+          .subscribe();
+        
+        setProducts(productsWithClicks);
+        
+        return () => {
+          supabase.removeChannel(clicksChannel);
+        };
       } catch (error) {
         console.error("Erreur lors du chargement des produits:", error);
         toast({
