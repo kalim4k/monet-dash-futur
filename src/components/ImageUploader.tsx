@@ -60,24 +60,27 @@ export function ImageUploader({ userId, currentImageUrl, onImageUploaded }: Imag
       
       // Create a unique file path
       const fileExt = file.name.split('.').pop();
-      const filePath = `${userId}/${Date.now()}.${fileExt}`;
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${userId}/${fileName}`;
       
       // Delete old avatar if exists
       if (currentImageUrl) {
         try {
-          // Extract user ID and filename from URL
           const urlParts = currentImageUrl.split('/');
-          const oldFileName = urlParts[urlParts.length - 1];
+          // Look for userId in the path to extract the correct part
+          let oldFilePath = '';
+          for (let i = 0; i < urlParts.length; i++) {
+            if (urlParts[i] === 'avatars' && i + 2 < urlParts.length) {
+              oldFilePath = `${urlParts[i+1]}/${urlParts[i+2]}`;
+              break;
+            }
+          }
           
-          console.log(`Attempting to delete old avatar: ${userId}/${oldFileName}`);
-          
-          const { error: deleteError } = await supabase.storage
-            .from('avatars')
-            .remove([`${userId}/${oldFileName}`]);
-          
-          if (deleteError) {
-            console.log("Error removing old avatar:", deleteError);
-            // Continue even if deletion fails
+          if (oldFilePath) {
+            console.log(`Attempting to delete old avatar: ${oldFilePath}`);
+            await supabase.storage
+              .from('avatars')
+              .remove([oldFilePath]);
           }
         } catch (error) {
           console.log("Failed to delete old avatar:", error);
@@ -100,20 +103,20 @@ export function ImageUploader({ userId, currentImageUrl, onImageUploaded }: Imag
       }
 
       // Get the public URL
-      const { data: { publicUrl } } = supabase.storage
+      const publicUrl = supabase.storage
         .from('avatars')
-        .getPublicUrl(filePath);
+        .getPublicUrl(filePath).data.publicUrl;
       
       console.log(`Avatar uploaded successfully, public URL: ${publicUrl}`);
       
       // Update user profile in the database
       const { error: updateError } = await supabase
         .from('profiles')
-        .upsert({
-          id: userId,
+        .update({
           avatar_url: publicUrl,
           updated_at: new Date().toISOString()
-        });
+        })
+        .eq('id', userId);
 
       if (updateError) {
         console.error("Profile update error:", updateError);
@@ -148,18 +151,23 @@ export function ImageUploader({ userId, currentImageUrl, onImageUploaded }: Imag
     try {
       setIsUploading(true);
       
-      // Extract filename from URL
+      // Extract file path from URL
       const urlParts = currentImageUrl.split('/');
-      const fileName = urlParts[urlParts.length - 1];
+      // Look for userId in the path to extract the correct part
+      let filePath = '';
+      for (let i = 0; i < urlParts.length; i++) {
+        if (urlParts[i] === 'avatars' && i + 2 < urlParts.length) {
+          filePath = `${urlParts[i+1]}/${urlParts[i+2]}`;
+          break;
+        }
+      }
       
-      console.log(`Removing image: ${userId}/${fileName}`);
-      
-      // Delete from storage
-      const { error } = await supabase.storage
-        .from('avatars')
-        .remove([`${userId}/${fileName}`]);
-      
-      if (error) throw error;
+      if (filePath) {
+        console.log(`Removing image: ${filePath}`);
+        await supabase.storage
+          .from('avatars')
+          .remove([filePath]);
+      }
       
       // Update user profile
       const { error: updateError } = await supabase

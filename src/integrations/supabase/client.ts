@@ -15,14 +15,22 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   }
 });
 
-// Vérification silencieuse si le bucket existe - pas de création
-// Nous laissons l'administrateur créer les buckets via la console ou des migrations
-const checkStorageBucket = async () => {
+// Vérification du bucket avatars pour assurer qu'il est accessible
+const checkAvatarsBucket = async () => {
   try {
     const { data: buckets, error } = await supabase.storage.listBuckets();
     
-    if (!error && buckets) {
-      console.log("Storage buckets vérifiés avec succès");
+    if (error) {
+      console.error("Erreur lors de la vérification des buckets:", error);
+      return;
+    }
+    
+    const avatarsBucket = buckets?.find(bucket => bucket.name === 'avatars');
+    
+    if (avatarsBucket) {
+      console.log("Bucket 'avatars' trouvé avec succès");
+    } else {
+      console.warn("Le bucket 'avatars' n'existe pas. Les uploads d'images ne fonctionneront pas correctement.");
     }
   } catch (error) {
     console.error('Erreur lors de la vérification des buckets:', error);
@@ -30,4 +38,4 @@ const checkStorageBucket = async () => {
 };
 
 // Exécuter la vérification au chargement
-checkStorageBucket();
+checkAvatarsBucket();
