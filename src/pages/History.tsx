@@ -120,8 +120,8 @@ const History = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400">Gérez vos revenus et retraits</p>
           </div>
           
-          {/* Financial Overview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {/* Financial Overview Cards - Updated to grid-cols-2 sm:grid-cols-4 to match homepage */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
             {/* Balance Card */}
             <Card className="bg-gradient-to-br from-violet-500 to-purple-600 border-none text-white shadow-lg hover:shadow-xl transition-all">
               <CardHeader className="pb-2">
