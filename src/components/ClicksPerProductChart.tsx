@@ -18,156 +18,176 @@ export function ClicksPerProductChart() {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  useEffect(() => {
-    const fetchProductStats = async () => {
-      if (!user) {
+  const fetchProductStats = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      // Get all active products first
+      const { data: allProducts, error: productsError } = await supabase
+        .from('products')
+        .select('id, name')
+        .eq('active', true);
+
+      if (productsError) {
+        console.error("Error fetching products:", productsError);
+        setLoading(false);
+        return;
+      }
+
+      if (!allProducts || allProducts.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      // Get all affiliate links for this user
+      const { data: affiliateLinks, error: linksError } = await supabase
+        .from('affiliate_links')
+        .select('id, product_id')
+        .eq('user_id', user.id);
+
+      if (linksError) {
+        console.error("Error fetching affiliate links:", linksError);
+        setLoading(false);
+        return;
+      }
+
+      // Create a map of product_id to links for easier lookup
+      const productLinkMap = {};
+      const existingProductIds = new Set();
+      
+      // Process existing affiliate links
+      if (affiliateLinks && affiliateLinks.length > 0) {
+        affiliateLinks.forEach(link => {
+          if (!productLinkMap[link.product_id]) {
+            productLinkMap[link.product_id] = [];
+          }
+          productLinkMap[link.product_id].push(link.id);
+          existingProductIds.add(link.product_id);
+        });
+      }
+      
+      // Create affiliate links for products that don't have them
+      for (const product of allProducts) {
+        if (!existingProductIds.has(product.id)) {
+          const { data: newLink, error: createError } = await supabase
+            .from('affiliate_links')
+            .insert({
+              user_id: user.id,
+              product_id: product.id,
+              code: Math.random().toString(36).substring(2, 12)
+            })
+            .select('id')
+            .single();
+            
+          if (createError) {
+            console.error(`Error creating link for product ${product.id}:`, createError);
+            continue;
+          }
+          
+          if (newLink) {
+            if (!productLinkMap[product.id]) {
+              productLinkMap[product.id] = [];
+            }
+            productLinkMap[product.id].push(newLink.id);
+            existingProductIds.add(product.id);
+          }
+        }
+      }
+      
+      // Get all link IDs to fetch clicks
+      const allLinkIds = Object.values(productLinkMap).flat();
+      
+      if (allLinkIds.length === 0) {
+        // No links found or created, show products with zero clicks
+        const productsWithNoClicks = allProducts.map(product => ({
+          id: product.id,
+          name: product.name,
+          clicks: 0,
+          revenue: 0
+        }));
+        
+        setProducts(productsWithNoClicks);
         setLoading(false);
         return;
       }
       
-      try {
-        setLoading(true);
+      // Get clicks for all links in a single query
+      const { data: clicksData, error: clicksError } = await supabase
+        .from('clicks')
+        .select('affiliate_link_id, id')
+        .in('affiliate_link_id', allLinkIds)
+        .eq('is_valid', true);
         
-        // 1. Récupérer les liens d'affiliation de l'utilisateur et les produits associés en une requête
-        const { data: affiliateLinks, error: linksError } = await supabase
-          .from('affiliate_links')
-          .select(`
-            id,
-            product_id,
-            products:product_id (
-              id,
-              name
-            )
-          `)
-          .eq('user_id', user.id);
-          
-        if (linksError) {
-          console.error("Erreur lors de la récupération des liens d'affiliation:", linksError);
-          setLoading(false);
-          return;
-        }
-
-        if (!affiliateLinks || affiliateLinks.length === 0) {
-          // Si l'utilisateur n'a pas encore de liens, chercher tous les produits actifs
-          const { data: allProducts, error: productsError } = await supabase
-            .from('products')
-            .select('id, name')
-            .eq('active', true);
-
-          if (productsError || !allProducts) {
-            console.error("Erreur lors de la récupération des produits:", productsError);
-            setLoading(false);
-            return;
-          }
-
-          // Créer des liens pour tous les produits actifs
-          for (const product of allProducts) {
-            await supabase
-              .from('affiliate_links')
-              .insert({
-                user_id: user.id,
-                product_id: product.id,
-                code: Math.random().toString(36).substring(2, 12)
-              });
-          }
-
-          // Récupérer les liens nouvellement créés
-          const { data: newLinks, error: newLinksError } = await supabase
-            .from('affiliate_links')
-            .select(`
-              id,
-              product_id,
-              products:product_id (
-                id,
-                name
-              )
-            `)
-            .eq('user_id', user.id);
-
-          if (newLinksError || !newLinks) {
-            console.error("Erreur lors de la récupération des nouveaux liens:", newLinksError);
-            setLoading(false);
-            return;
-          }
-
-          // Utiliser les nouveaux liens (qui n'auront pas encore de clics)
-          const statsWithNoClicks = newLinks.map(link => ({
-            id: link.product_id,
-            name: link.products?.name || "Produit inconnu",
-            clicks: 0,
-            revenue: 0
-          }));
-
-          setProducts(statsWithNoClicks);
-          setLoading(false);
-          return;
-        }
-
-        // 2. Récupérer les clics pour chaque lien d'affiliation
-        const linkIds = affiliateLinks.map(link => link.id);
-        const { data: clicksData, error: clicksError } = await supabase
-          .from('clicks')
-          .select('affiliate_link_id')
-          .in('affiliate_link_id', linkIds)
-          .eq('is_valid', true);
-
-        if (clicksError) {
-          console.error("Erreur lors de la récupération des clics:", clicksError);
-          setLoading(false);
-          return;
-        }
-
-        // 3. Compter les clics par lien d'affiliation
-        const clickCounts = {};
-        if (clicksData && clicksData.length > 0) {
-          clicksData.forEach(click => {
-            if (!clickCounts[click.affiliate_link_id]) {
-              clickCounts[click.affiliate_link_id] = 0;
-            }
-            clickCounts[click.affiliate_link_id]++;
-          });
-        }
-
-        // 4. Créer les statistiques par produit
-        const productStats = affiliateLinks.map(link => {
-          const clickCount = clickCounts[link.id] || 0;
-          return {
-            id: link.product_id,
-            name: link.products?.name || "Produit inconnu",
-            clicks: clickCount,
-            revenue: clickCount // 1 FCFA par clic
-          };
-        });
-
-        setProducts(productStats);
-      } catch (error) {
-        console.error("Erreur générale lors de la récupération des statistiques:", error);
-      } finally {
+      if (clicksError) {
+        console.error("Error fetching clicks:", clicksError);
         setLoading(false);
+        return;
       }
-    };
-    
-    // Charger les statistiques au chargement du composant
+      
+      // Count clicks per link ID
+      const clicksPerLinkId = {};
+      if (clicksData && clicksData.length > 0) {
+        clicksData.forEach(click => {
+          if (!clicksPerLinkId[click.affiliate_link_id]) {
+            clicksPerLinkId[click.affiliate_link_id] = 0;
+          }
+          clicksPerLinkId[click.affiliate_link_id]++;
+        });
+      }
+      
+      // Aggregate clicks by product
+      const productStats = allProducts.map(product => {
+        const linkIds = productLinkMap[product.id] || [];
+        let totalClicks = 0;
+        
+        linkIds.forEach(linkId => {
+          totalClicks += clicksPerLinkId[linkId] || 0;
+        });
+        
+        return {
+          id: product.id,
+          name: product.name,
+          clicks: totalClicks,
+          revenue: totalClicks // 1 FCFA per click
+        };
+      });
+      
+      console.log("Calculated product stats:", productStats);
+      setProducts(productStats);
+    } catch (error) {
+      console.error("General error while fetching product stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Load statistics when the component mounts
     fetchProductStats();
     
-    // Configurer la mise à jour en temps réel avec Supabase Realtime
+    // Set up real-time updates with Supabase Realtime
     const channel = supabase
       .channel('clicks-changes')
       .on('postgres_changes', 
         {
-          event: '*', // INSERT, UPDATE ou DELETE
+          event: '*', // INSERT, UPDATE or DELETE
           schema: 'public',
           table: 'clicks',
         }, 
         (payload) => {
-          console.log("Mise à jour en temps réel des clics détectée:", payload);
-          // Recharger les statistiques quand il y a des changements
+          console.log("Real-time click update detected:", payload);
+          // Reload statistics when there are changes
           fetchProductStats();
         }
       )
       .subscribe();
       
-    // Nettoyer l'abonnement
+    // Clean up subscription
     return () => {
       supabase.removeChannel(channel);
     };
