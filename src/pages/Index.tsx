@@ -1,4 +1,3 @@
-
 import { ArrowUpRight, ChevronUp, Award, MousePointer, TrendingUp, User, CreditCard, DollarSign, Activity } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ClicksPerProductChart } from "@/components/ClicksPerProductChart";
@@ -18,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { ProductRevenuePieChart } from "@/components/ProductRevenuePieChart";
 
 const Index = () => {
   const isMobile = useIsMobile();
@@ -214,6 +214,17 @@ const Index = () => {
                   <ClicksPerProductChart />
                 </CardContent>
               </Card>
+            </div>
+          </section>
+          
+          {/* Nouvelle section pour le graphique circulaire des revenus par produit */}
+          <section className="mb-8">
+            <h2 className="text-xl font-semibold mb-4 flex items-center">
+              <CreditCard className="mr-2 h-5 w-5 text-primary" />
+              Répartition des Revenus
+            </h2>
+            <div className="grid gap-4 grid-cols-1">
+              <ProductRevenuePieChart />
             </div>
           </section>
           
