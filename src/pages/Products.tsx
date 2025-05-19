@@ -170,8 +170,8 @@ const Products = () => {
             
             const { data: clicksData, error: clicksError } = await supabase
               .from('clicks')
-              .select('affiliate_link_id, count')
-              .in('affiliate_link_id', linkIds)
+              .select('affiliate_link_id, id')
+              .in('affiliate_link_id', linkIds as string[])
               .eq('is_valid', true);
               
             if (clicksError) {
@@ -180,7 +180,7 @@ const Products = () => {
             }
             
             // 4. Compter les clics par lien d'affiliation
-            const clickCounts = {};
+            const clickCounts: Record<string, number> = {};
             if (clicksData && clicksData.length > 0) {
               clicksData.forEach(click => {
                 if (!clickCounts[click.affiliate_link_id]) {
