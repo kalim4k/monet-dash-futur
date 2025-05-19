@@ -1,4 +1,3 @@
-
 import { ArrowUpRight, ChevronUp, Award, MousePointer, TrendingUp, User, CreditCard, DollarSign, Activity } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ClicksPerProductChart } from "@/components/ClicksPerProductChart";
@@ -87,24 +86,33 @@ const Index = () => {
       
       <main className="flex-1 pb-16 md:pb-0 w-full">
         <div className="container px-4 sm:px-6 max-w-7xl py-6">
-          {/* Header amélioré */}
-          <header className="mb-8 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <div className={isMobile ? "flex-1" : ""}>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Tableau de bord
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                  Bienvenue sur votre tableau de bord de monétisation
-                </p>
+          {/* Modern header inspired by the provided designs */}
+          <header className="mb-8 bg-gradient-to-r from-indigo-100 to-violet-100 dark:from-indigo-900/30 dark:to-violet-900/30 rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="bg-white dark:bg-slate-800 rounded-full h-10 w-10 flex items-center justify-center shadow-md">
+                  <DollarSign className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                    Dashboard
+                  </h1>
+                  {!isMobile && (
+                    <p className="text-muted-foreground text-sm mt-1">
+                      Suivez vos gains et performances
+                    </p>
+                  )}
+                </div>
               </div>
               
-              <div className={isMobile ? "ml-4" : ""}>
+              <div>
                 <UserProfileCard />
               </div>
             </div>
             
-            <PlatformsCarousel />
+            <div className="mt-6">
+              <PlatformsCarousel />
+            </div>
           </header>
           
           {/* Section des gains avec design moderne */}
