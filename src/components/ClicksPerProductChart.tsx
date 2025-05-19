@@ -57,8 +57,8 @@ export function ClicksPerProductChart() {
       }
 
       // Create a map of product_id to links for easier lookup
-      const productLinkMap = {};
-      const existingProductIds = new Set();
+      const productLinkMap: Record<string, string[]> = {};
+      const existingProductIds = new Set<string>();
       
       // Process existing affiliate links
       if (affiliateLinks && affiliateLinks.length > 0) {
@@ -100,7 +100,10 @@ export function ClicksPerProductChart() {
       }
       
       // Get all link IDs to fetch clicks
-      const allLinkIds = Object.values(productLinkMap).flat();
+      const allLinkIds: string[] = [];
+      Object.values(productLinkMap).forEach(links => {
+        allLinkIds.push(...links);
+      });
       
       if (allLinkIds.length === 0) {
         // No links found or created, show products with zero clicks
@@ -116,11 +119,11 @@ export function ClicksPerProductChart() {
         return;
       }
       
-      // Get clicks for all links in a single query
+      // Get clicks for all links in a single query - Fix the TypeScript error here by ensuring allLinkIds is a string array
       const { data: clicksData, error: clicksError } = await supabase
         .from('clicks')
         .select('affiliate_link_id, id')
-        .in('affiliate_link_id', allLinkIds)
+        .in('affiliate_link_id', allLinkIds as string[])
         .eq('is_valid', true);
         
       if (clicksError) {
@@ -130,7 +133,7 @@ export function ClicksPerProductChart() {
       }
       
       // Count clicks per link ID
-      const clicksPerLinkId = {};
+      const clicksPerLinkId: Record<string, number> = {};
       if (clicksData && clicksData.length > 0) {
         clicksData.forEach(click => {
           if (!clicksPerLinkId[click.affiliate_link_id]) {
