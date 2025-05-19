@@ -113,7 +113,7 @@ const Index = () => {
               <DollarSign className="mr-2 h-5 w-5 text-primary" />
               Résumé des Gains
             </h2>
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <Card className="overflow-hidden border-none shadow-md bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20">
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start">
@@ -148,7 +148,7 @@ const Index = () => {
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-sm font-medium text-green-600 dark:text-green-300">Clics générés</p>
+                      <p className="text-sm font-medium text-green-600 dark:text-green-300">Clics totaux générés</p>
                       <h3 className="text-3xl font-bold mt-2">{earnings.clicks}</h3>
                       <p className="text-xs text-muted-foreground mt-1">&nbsp;</p>
                     </div>

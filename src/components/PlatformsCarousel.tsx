@@ -1,5 +1,4 @@
 
-import { useEffect, useRef } from 'react';
 import { Card } from "@/components/ui/card";
 
 const platforms = [{
@@ -17,51 +16,9 @@ const platforms = [{
 }];
 
 export function PlatformsCarousel() {
-  const carouselRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    const scrollWidth = carouselRef.current?.scrollWidth || 0;
-    const clientWidth = carouselRef.current?.clientWidth || 0;
-    if (scrollWidth <= clientWidth) return;
-
-    // Animation params
-    const duration = 15000; // 15 seconds for one full loop
-    const scrollAmount = 1; // pixels to scroll per frame
-    let position = 0;
-    let animationFrameId: number | null = null;
-
-    // Scroll animation function
-    const scrollCarousel = () => {
-      if (!carouselRef.current) return;
-      position += scrollAmount;
-
-      // Reset position when we've scrolled through half the content
-      // This creates an infinite loop effect
-      if (position >= scrollWidth / 2) {
-        position = 0;
-      }
-      carouselRef.current.scrollLeft = position;
-      animationFrameId = requestAnimationFrame(scrollCarousel);
-    };
-
-    // Start animation
-    animationFrameId = requestAnimationFrame(scrollCarousel);
-
-    // Cleanup
-    return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-    };
-  }, []);
-  
   return (
-    <div className="w-full overflow-hidden mb-6">
-      <div 
-        ref={carouselRef} 
-        className="flex gap-3 overflow-x-auto scrollbar-hide py-2"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
+    <div className="w-full mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {platforms.map((platform, index) => (
           <Card 
             key={index} 
