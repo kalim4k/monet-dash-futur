@@ -24,6 +24,39 @@ export function ImageUploader({ userId, currentImageUrl, onImageUploaded }: Imag
     }
   }, [currentImageUrl]);
 
+  // Create bucket if it doesn't exist
+  const ensureBucketExists = async (): Promise<boolean> => {
+    try {
+      // Check if the bucket exists
+      const { data: buckets, error } = await supabase.storage.listBuckets();
+      
+      if (error) {
+        console.error("Error checking buckets:", error);
+        return false;
+      }
+      
+      // If the bucket doesn't exist, create it
+      if (!buckets?.find(bucket => bucket.name === 'avatars')) {
+        const { error: createError } = await supabase.storage.createBucket('avatars', {
+          public: true,
+          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif'],
+          fileSizeLimit: 2097152, // 2MB in bytes
+        });
+        
+        if (createError) {
+          console.error("Error creating bucket:", createError);
+          return false;
+        }
+        console.log('Bucket "avatars" created successfully');
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Failed to ensure bucket exists:", error);
+      return false;
+    }
+  };
+
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -60,35 +93,29 @@ export function ImageUploader({ userId, currentImageUrl, onImageUploaded }: Imag
       
       // Create a unique file path
       const fileExt = file.name.split('.').pop();
-      const filePath = `${userId}/avatar-${Date.now()}.${fileExt}`;
+      const filePath = `${userId}/${Date.now()}.${fileExt}`;
       
-      // Check if the bucket exists and create it if it doesn't
-      const { data: buckets } = await supabase.storage.listBuckets();
-      if (!buckets?.find(bucket => bucket.name === 'avatars')) {
-        await supabase.storage.createBucket('avatars', {
-          public: true,
-          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif'],
-          fileSizeLimit: 2097152, // 2MB in bytes
-        });
-        console.log('Bucket "avatars" created successfully');
+      // Ensure the bucket exists before uploading
+      const bucketExists = await ensureBucketExists();
+      if (!bucketExists) {
+        throw new Error("Impossible de créer ou d'accéder au bucket de stockage");
       }
 
-      // Delete old avatar if exists and has the same user id pattern
+      // Delete old avatar if exists
       if (currentImageUrl) {
-        const urlParts = currentImageUrl.split('/');
-        const oldFilePath = urlParts[urlParts.length - 1];
-        if (oldFilePath.includes(userId)) {
-          try {
-            const { error: deleteError } = await supabase.storage
-              .from('avatars')
-              .remove([`${userId}/${oldFilePath}`]);
-            
-            if (deleteError) {
-              console.log("Error removing old avatar:", deleteError);
-            }
-          } catch (error) {
-            console.log("Failed to delete old avatar:", error);
+        try {
+          const urlParts = currentImageUrl.split('/');
+          const oldFileName = urlParts[urlParts.length - 1];
+          
+          const { error: deleteError } = await supabase.storage
+            .from('avatars')
+            .remove([`${userId}/${oldFileName}`]);
+          
+          if (deleteError) {
+            console.log("Error removing old avatar:", deleteError);
           }
+        } catch (error) {
+          console.log("Failed to delete old avatar:", error);
         }
       }
 
@@ -154,12 +181,12 @@ export function ImageUploader({ userId, currentImageUrl, onImageUploaded }: Imag
       
       // Extract filename from URL
       const urlParts = currentImageUrl.split('/');
-      const filePath = `${userId}/${urlParts[urlParts.length - 1]}`;
+      const fileName = urlParts[urlParts.length - 1];
       
       // Delete from storage
       const { error } = await supabase.storage
         .from('avatars')
-        .remove([filePath]);
+        .remove([`${userId}/${fileName}`]);
       
       if (error) throw error;
       
