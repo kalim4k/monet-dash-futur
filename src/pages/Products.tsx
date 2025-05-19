@@ -109,65 +109,91 @@ const Products = () => {
           };
         });
         
-        // Récupérer les données de clics pour tous les produits en une seule requête
+        // Méthode optimisée pour récupérer tous les compteurs de clics en une seule requête
         const fetchClickCounts = async () => {
           try {
-            // Récupérer tous les liens d'affiliation de l'utilisateur
+            // 1. Récupérer tous les liens d'affiliation de l'utilisateur
             const { data: affiliateLinks, error: linksError } = await supabase
               .from('affiliate_links')
               .select('id, product_id')
               .eq('user_id', user.id);
               
-            if (linksError || !affiliateLinks) {
+            if (linksError) {
               console.error("Erreur lors de la récupération des liens d'affiliation:", linksError);
               return productsWithUserLinks.map(p => ({ ...p, clicks_count: 0 }));
             }
             
-            // Créer un mapping des IDs de produits vers leurs liens d'affiliation
+            if (!affiliateLinks || affiliateLinks.length === 0) {
+              // Aucun lien n'existe encore, créer les liens pour chaque produit
+              const createdLinks = [];
+              for (const product of productsWithUserLinks) {
+                const { data: newLink, error: createError } = await supabase
+                  .from('affiliate_links')
+                  .insert({
+                    user_id: user.id,
+                    product_id: product.id,
+                    code: Math.random().toString(36).substring(2, 12)
+                  })
+                  .select('id, product_id')
+                  .single();
+                  
+                if (!createError && newLink) {
+                  createdLinks.push(newLink);
+                }
+              }
+              
+              if (createdLinks.length === 0) {
+                return productsWithUserLinks.map(p => ({ ...p, clicks_count: 0 }));
+              }
+              
+              // Utiliser les liens nouvellement créés
+              const productToLinkMap = createdLinks.reduce((map, link) => {
+                map[link.product_id] = link.id;
+                return map;
+              }, {});
+              
+              // Il n'y aura pas de clics pour les nouveaux liens
+              return productsWithUserLinks.map(product => ({
+                ...product,
+                clicks_count: 0
+              }));
+            }
+            
+            // 2. Créer un mapping des IDs de produits vers leurs liens d'affiliation
             const productToLinkMap = affiliateLinks.reduce((map, link) => {
               map[link.product_id] = link.id;
               return map;
             }, {});
             
-            // Si aucun lien d'affiliation n'existe encore, retourner des compteurs à zéro
-            if (affiliateLinks.length === 0) {
-              return productsWithUserLinks.map(p => ({ ...p, clicks_count: 0 }));
-            }
-            
-            // Récupérer les compteurs de clics pour tous les liens d'affiliation en une requête
+            // 3. Récupérer tous les clics pour tous les liens d'affiliation en une requête
             const linkIds = affiliateLinks.map(link => link.id);
+            
             const { data: clicksData, error: clicksError } = await supabase
               .from('clicks')
               .select('affiliate_link_id, count')
               .in('affiliate_link_id', linkIds)
-              .eq('is_valid', true)
-              .then(async ({ data, error }) => {
-                if (error) return { data: null, error };
-                
-                // Compter manuellement les clics par lien d'affiliation
-                const counts = {};
-                if (data && data.length > 0) {
-                  // Compter les clics par lien d'affiliation
-                  data.forEach(click => {
-                    if (!counts[click.affiliate_link_id]) {
-                      counts[click.affiliate_link_id] = 0;
-                    }
-                    counts[click.affiliate_link_id]++;
-                  });
-                }
-                
-                return { data: counts, error: null };
-              });
+              .eq('is_valid', true);
               
             if (clicksError) {
               console.error("Erreur lors de la récupération des compteurs de clics:", clicksError);
               return productsWithUserLinks.map(p => ({ ...p, clicks_count: 0 }));
             }
             
-            // Mettre à jour les produits avec leurs compteurs de clics
+            // 4. Compter les clics par lien d'affiliation
+            const clickCounts = {};
+            if (clicksData && clicksData.length > 0) {
+              clicksData.forEach(click => {
+                if (!clickCounts[click.affiliate_link_id]) {
+                  clickCounts[click.affiliate_link_id] = 0;
+                }
+                clickCounts[click.affiliate_link_id]++;
+              });
+            }
+            
+            // 5. Mettre à jour chaque produit avec son nombre de clics
             return productsWithUserLinks.map(product => {
               const affiliateLinkId = productToLinkMap[product.id];
-              const clickCount = affiliateLinkId && clicksData ? (clicksData[affiliateLinkId] || 0) : 0;
+              const clickCount = affiliateLinkId ? (clickCounts[affiliateLinkId] || 0) : 0;
               return {
                 ...product,
                 clicks_count: clickCount
@@ -179,8 +205,9 @@ const Products = () => {
           }
         };
         
-        // Utiliser la méthode optimisée pour récupérer tous les compteurs de clics
+        // Exécuter la nouvelle méthode optimisée
         const productsWithClicks = await fetchClickCounts();
+        setProducts(productsWithClicks);
         
         // Configurer un canal pour les mises à jour en temps réel
         const clicksChannel = supabase
@@ -190,14 +217,13 @@ const Products = () => {
             schema: 'public',
             table: 'clicks'
           }, payload => {
-            // Lorsqu'un nouveau clic est enregistré, mettre à jour les produits
+            console.log('Nouvelle mise à jour de clics détectée:', payload);
+            // Actualiser les compteurs de clics
             fetchClickCounts().then(updatedProducts => {
               setProducts(updatedProducts);
             });
           })
           .subscribe();
-        
-        setProducts(productsWithClicks);
         
         return () => {
           supabase.removeChannel(clicksChannel);
