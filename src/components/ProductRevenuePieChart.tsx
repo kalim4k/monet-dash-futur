@@ -182,21 +182,21 @@ export function ProductRevenuePieChart() {
       </CardHeader>
       <CardContent>
         {loading ? (
-          <div className="h-[250px] flex items-center justify-center">
-            <Skeleton className="h-[200px] w-[200px] rounded-full" />
+          <div className="h-[350px] flex items-center justify-center">
+            <Skeleton className="h-[300px] w-[300px] rounded-full" />
           </div>
         ) : productRevenue.length > 0 ? (
-          <div className="h-[250px]">
+          <div className="h-[350px]">
             <div className="flex items-center justify-center">
               <div className="relative">
-                <ResponsiveContainer width={200} height={200}>
+                <ResponsiveContainer width={240} height={240}>
                   <PieChart>
                     <Pie
                       data={productRevenue}
                       cx="50%"
                       cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
+                      innerRadius={70}
+                      outerRadius={100}
                       paddingAngle={2}
                       dataKey="value"
                       stroke="rgba(255,255,255,0.5)"
@@ -220,7 +220,7 @@ export function ProductRevenuePieChart() {
             {renderLegend()}
           </div>
         ) : (
-          <div className="h-[250px] flex items-center justify-center">
+          <div className="h-[350px] flex items-center justify-center">
             <p className="text-gray-500 dark:text-gray-400 text-center">
               Aucun revenu à afficher pour le moment
             </p>
