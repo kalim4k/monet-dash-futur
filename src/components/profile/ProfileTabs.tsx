@@ -1,13 +1,15 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, CreditCard, Bell } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PersonalInfoCard } from "./PersonalInfoCard";
 import { SecurityCard } from "./SecurityCard";
 import { PaymentMethodsCard } from "./PaymentMethodsCard";
 import { PaymentAccountCard } from "./PaymentAccountCard";
 import { SocialNetworksCard } from "./SocialNetworksCard";
 import { User as SupabaseUser } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProfileTabsProps {
   user: SupabaseUser | null;
@@ -35,6 +37,87 @@ export function ProfileTabs({
   setIsLoading
 }: ProfileTabsProps) {
   const [paymentMethod, setPaymentMethod] = useState("momo");
+  const { toast } = useToast();
+  const [userSettings, setUserSettings] = useState<any>(null);
+  const [loadingSettings, setLoadingSettings] = useState(false);
+
+  // Fetch user settings from database
+  useEffect(() => {
+    const fetchUserSettings = async () => {
+      if (!user?.id) return;
+      
+      try {
+        setLoadingSettings(true);
+        
+        const { data, error } = await supabase
+          .from('user_settings')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (error && error.code !== 'PGRST116') {
+          console.error("Error fetching user settings:", error);
+          return;
+        }
+        
+        if (data) {
+          setUserSettings(data);
+        } else {
+          // Create default settings if not found
+          const { data: newSettings, error: insertError } = await supabase
+            .from('user_settings')
+            .insert({
+              user_id: user.id,
+            })
+            .select()
+            .single();
+          
+          if (insertError) {
+            console.error("Error creating user settings:", insertError);
+            return;
+          }
+          
+          setUserSettings(newSettings);
+        }
+        
+      } catch (error) {
+        console.error("Error in user settings fetch:", error);
+      } finally {
+        setLoadingSettings(false);
+      }
+    };
+    
+    fetchUserSettings();
+  }, [user]);
+  
+  // Fetch payment methods to set default
+  useEffect(() => {
+    const fetchPaymentMethods = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('payment_methods')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_default', true)
+          .single();
+        
+        if (error && error.code !== 'PGRST116') {
+          console.error("Error fetching payment methods:", error);
+          return;
+        }
+        
+        if (data) {
+          setPaymentMethod(data.type);
+        }
+      } catch (error) {
+        console.error("Error in payment methods fetch:", error);
+      }
+    };
+    
+    fetchPaymentMethods();
+  }, [user]);
 
   return (
     <Tabs defaultValue="user-info" className="w-full">
@@ -90,7 +173,10 @@ export function ProfileTabs({
       
       {/* Notifications Section */}
       <TabsContent value="notifications">
-        <SocialNetworksCard />
+        <SocialNetworksCard 
+          userSettings={userSettings}
+          isLoading={loadingSettings} 
+        />
       </TabsContent>
     </Tabs>
   );

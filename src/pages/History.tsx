@@ -6,7 +6,7 @@ import { UserProfileCard } from "@/components/UserProfileCard";
 import { PlatformsCarousel } from "@/components/PlatformsCarousel";
 import { PaymentHistoryTable, PaymentHistoryItem } from "@/components/PaymentHistoryTable";
 import { WithdrawalForm } from "@/components/WithdrawalForm";
-import { generateMockPaymentHistory, generateMockPaymentMethods } from "@/lib/utils";
+import { generateMockPaymentMethods } from "@/lib/utils";
 import { Wallet, FileText, Plus, ArrowDown, ArrowUp, Clock, DollarSign, ChartPie } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,31 +14,41 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { WeeklyEarnings } from "@/components/WeeklyEarnings";
 import { ProductRevenuePieChart } from "@/components/ProductRevenuePieChart";
+import { toast } from "@/hooks/use-toast";
 
 const History = () => {
   const { user } = useAuth();
-  // État pour les gains et les statistiques de l'utilisateur
+  
+  // User earnings and stats state
   const [earnings, setEarnings] = useState({ total: 0, weekly: 0, clicks: 0, bonus: 0 });
-  // Tableau vide pour les transactions au lieu de générer des fausses
+  
+  // Transaction history state
   const [transactions, setTransactions] = useState<PaymentHistoryItem[]>([]);
-  const savedPaymentMethods = generateMockPaymentMethods();
+  
+  // Payment methods state
+  const [paymentMethods, setPaymentMethods] = useState(generateMockPaymentMethods());
+  
+  // Loading state
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Chargement des statistiques utilisateur depuis Supabase
+  // Load user statistics from Supabase
   const loadUserStats = async (userId: string) => {
     try {
-      // Récupérer les revenus totaux (1 FCFA par clic)
+      setIsLoading(true);
+      
+      // Get total earnings (1 FCFA per click)
       const { data: totalEarnings, error: totalError } = await supabase.rpc(
-        'get_affiliate_earnings', 
+        'get_user_account_balance',
         { user_id: userId }
       );
       
-      // Récupérer les revenus hebdomadaires (1 FCFA par clic)
+      // Get weekly earnings (1 FCFA per click)
       const { data: weeklyEarnings, error: weeklyError } = await supabase.rpc(
         'get_affiliate_weekly_earnings',
         { user_id: userId }
       );
       
-      // Récupérer le nombre total de clics
+      // Get total clicks
       const { data: clicksData, error: clicksError } = await supabase
         .from('affiliate_links')
         .select('id')
@@ -61,19 +71,95 @@ const History = () => {
       }
       
       setEarnings({
-        // 1 FCFA par clic
-        total: totalEarnings || 0, 
+        total: totalEarnings || 0,
         weekly: weeklyEarnings || 0,
         clicks: clicksData || 0,
         bonus: 0 // Pour le moment, pas de système de bonus
       });
       
+      // Load transaction history
+      await loadTransactions(userId);
+      
+      // Load payment methods
+      await loadPaymentMethods(userId);
+      
     } catch (error) {
       console.error("Erreur lors du chargement des statistiques:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger vos statistiques financières",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
   
-  // Charger les statistiques si l'utilisateur est connecté
+  // Load transaction history
+  const loadTransactions = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      // Convert Supabase data to PaymentHistoryItem format
+      const formattedTransactions: PaymentHistoryItem[] = data.map(tx => ({
+        id: tx.id,
+        date: new Date(tx.created_at),
+        amount: tx.amount,
+        method: tx.payment_method as "momo" | "orange" | "paypal",
+        account: tx.account_details?.number || '',
+        status: tx.status as "completed" | "pending" | "failed"
+      }));
+      
+      setTransactions(formattedTransactions);
+    } catch (error) {
+      console.error("Erreur lors du chargement des transactions:", error);
+    }
+  };
+  
+  // Load payment methods from Supabase
+  const loadPaymentMethods = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('payment_methods')
+        .select('*')
+        .eq('user_id', userId);
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        // Group payment methods by type
+        const methodsByType = data.reduce((acc, method) => {
+          const type = method.type as "momo" | "orange" | "paypal";
+          if (!acc[type]) {
+            acc[type] = {
+              id: type,
+              type: type,
+              accounts: []
+            };
+          }
+          acc[type].accounts.push({
+            id: method.id,
+            type: method.type,
+            number: method.account_number,
+            name: method.name
+          });
+          return acc;
+        }, {} as Record<string, any>);
+        
+        setPaymentMethods(Object.values(methodsByType));
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des méthodes de paiement:", error);
+    }
+  };
+  
+  // Load user data when user is authenticated
   useEffect(() => {
     if (user?.id) {
       loadUserStats(user.id);
@@ -81,20 +167,65 @@ const History = () => {
   }, [user]);
 
   // Handle withdrawal submission
-  const handleWithdrawal = (data: any) => {
-    // Create a new transaction
-    const newTransaction: PaymentHistoryItem = {
-      id: `tx-${Date.now()}`,
-      date: new Date(),
-      amount: data.amount,
-      method: data.method as "momo" | "orange" | "paypal",
-      account: savedPaymentMethods.find(m => m.type === data.method)?.accounts.find(a => a.id === data.account)?.number || "",
-      status: "pending"
-    };
-
-    // Update transactions and balance
-    setTransactions([newTransaction, ...transactions]);
-    setEarnings(prev => ({ ...prev, total: prev.total - data.amount }));
+  const handleWithdrawal = async (data: any) => {
+    if (!user?.id) return;
+    
+    try {
+      // Create transaction in Supabase
+      const { data: transactionData, error } = await supabase
+        .from('transactions')
+        .insert({
+          user_id: user.id,
+          amount: data.amount,
+          transaction_type: 'withdrawal',
+          status: 'pending',
+          payment_method: data.method,
+          account_details: {
+            id: data.account,
+            number: paymentMethods.find(m => m.type === data.method)?.accounts.find(a => a.id === data.account)?.number || ""
+          },
+          description: `Retrait vers ${data.method === 'momo' ? 'MTN Mobile Money' : data.method === 'orange' ? 'Orange Money' : 'PayPal'}`
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      // Update transactions list
+      const newTransaction: PaymentHistoryItem = {
+        id: transactionData.id,
+        date: new Date(transactionData.created_at),
+        amount: transactionData.amount,
+        method: transactionData.payment_method as "momo" | "orange" | "paypal",
+        account: transactionData.account_details?.number || "",
+        status: "pending"
+      };
+      
+      // Update transactions and refresh balance
+      setTransactions([newTransaction, ...transactions]);
+      
+      // Refresh earnings
+      if (user?.id) {
+        const { data: updatedBalance } = await supabase.rpc(
+          'get_user_account_balance', 
+          { user_id: user.id }
+        );
+        
+        setEarnings(prev => ({ ...prev, total: updatedBalance || prev.total - data.amount }));
+      }
+      
+      toast({
+        title: "Demande de retrait envoyée",
+        description: `Votre demande de retrait de ${formatCurrency(data.amount)} a été enregistrée et est en cours de traitement.`,
+      });
+    } catch (error) {
+      console.error("Erreur lors de la demande de retrait:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de traiter votre demande de retrait",
+        variant: "destructive",
+      });
+    }
   };
 
   // Format currency function
@@ -106,8 +237,8 @@ const History = () => {
     }).format(amount);
   };
 
-  const totalIncome = earnings.total; // Utiliser le total des gains disponibles
-  const totalWithdrawal = transactions.reduce((sum, tx) => sum + tx.amount, 0);
+  const totalIncome = earnings.total + transactions.reduce((sum, tx) => tx.status === "completed" ? sum + tx.amount : sum, 0);
+  const totalWithdrawal = transactions.filter(tx => tx.status !== "failed").reduce((sum, tx) => sum + tx.amount, 0);
   const pendingAmount = transactions.filter(tx => tx.status === "pending").reduce((sum, tx) => sum + tx.amount, 0);
 
   return (
@@ -122,7 +253,7 @@ const History = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400">Gérez vos revenus et retraits</p>
           </div>
           
-          {/* Financial Overview Cards - Updated to grid-cols-2 sm:grid-cols-4 to match homepage */}
+          {/* Financial Overview Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
             {/* Balance Card */}
             <Card className="bg-gradient-to-br from-violet-500 to-purple-600 border-none text-white shadow-lg hover:shadow-xl transition-all">
@@ -203,7 +334,7 @@ const History = () => {
               </CardContent>
             </Card>
             
-            {/* New Product Revenue Pie Chart */}
+            {/* Product Revenue Pie Chart */}
             <ProductRevenuePieChart />
           </div>
           
@@ -223,11 +354,21 @@ const History = () => {
               
               <div className="p-6">
                 <TabsContent value="history" className="overflow-hidden mt-0">
-                  <PaymentHistoryTable transactions={transactions} />
+                  {isLoading ? (
+                    <div className="flex justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                  ) : (
+                    <PaymentHistoryTable transactions={transactions} />
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="withdraw" className="mt-0">
-                  <WithdrawalForm balance={earnings.total} savedMethods={savedPaymentMethods} onSubmit={handleWithdrawal} />
+                  <WithdrawalForm 
+                    balance={earnings.total} 
+                    savedMethods={paymentMethods} 
+                    onSubmit={handleWithdrawal} 
+                  />
                 </TabsContent>
               </div>
             </Tabs>

@@ -98,6 +98,39 @@ export type Database = {
           },
         ]
       }
+      payment_methods: {
+        Row: {
+          account_number: string
+          created_at: string
+          details: Json | null
+          id: string
+          is_default: boolean | null
+          name: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          account_number: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          account_number?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -188,6 +221,45 @@ export type Database = {
         }
         Relationships: []
       }
+      transactions: {
+        Row: {
+          account_details: Json | null
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          payment_method: string | null
+          processed_at: string | null
+          status: string
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          account_details?: Json | null
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          payment_method?: string | null
+          processed_at?: string | null
+          status: string
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          account_details?: Json | null
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          payment_method?: string | null
+          processed_at?: string | null
+          status?: string
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -205,6 +277,51 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          auto_withdrawal: boolean | null
+          auto_withdrawal_method_id: string | null
+          auto_withdrawal_threshold: number | null
+          created_at: string
+          dashboard_widgets: Json | null
+          id: string
+          language: string | null
+          notification_app: boolean | null
+          notification_email: boolean | null
+          theme: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_withdrawal?: boolean | null
+          auto_withdrawal_method_id?: string | null
+          auto_withdrawal_threshold?: number | null
+          created_at?: string
+          dashboard_widgets?: Json | null
+          id?: string
+          language?: string | null
+          notification_app?: boolean | null
+          notification_email?: boolean | null
+          theme?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_withdrawal?: boolean | null
+          auto_withdrawal_method_id?: string | null
+          auto_withdrawal_threshold?: number | null
+          created_at?: string
+          dashboard_widgets?: Json | null
+          id?: string
+          language?: string | null
+          notification_app?: boolean | null
+          notification_email?: boolean | null
+          theme?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -234,6 +351,10 @@ export type Database = {
       get_or_create_affiliate_link: {
         Args: { _user_id: string; _product_id: string }
         Returns: string
+      }
+      get_user_account_balance: {
+        Args: { user_id: string }
+        Returns: number
       }
       has_role: {
         Args: {
