@@ -27,7 +27,8 @@ import {
   LayoutDashboard, 
   BarChartBig, 
   Download, 
-  ChevronRight 
+  ChevronRight,
+  User as UserIcon
 } from "lucide-react";
 
 const Settings = () => {
@@ -500,7 +501,7 @@ const Settings = () => {
                         
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <User className="h-5 w-5 text-gray-500" />
+                            <UserIcon className="h-5 w-5 text-gray-500" />
                             <p className="text-sm">Top affiliés</p>
                           </div>
                           <Switch defaultChecked />
