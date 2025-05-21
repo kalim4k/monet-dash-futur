@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTracking } from "@/hooks/useTracking";
+import ProductProgressBar from "@/components/ProductProgressBar";
 
 const CapcutProPage = () => {
   const [clickCount, setClickCount] = useState(() => {
@@ -19,17 +20,18 @@ const CapcutProPage = () => {
   // ID correspondant à "Capcut Pro à Vie" dans la base de données (format UUID)
   useTracking("f6a3cdb6-6fa5-4413-a431-2682d1a1003c");
   
-  // Liste des liens publicitaires
+  // Liste des liens publicitaires dans l'ordre à suivre
   const adLinks = [
     "https://www.profitableratecpm.com/t7bwwufze?key=a6ddcb1a7d4c7d75c656937f3e87c741",
     "https://www.profitableratecpm.com/t9jb9smf?key=40443693c17abb2135e9b6e3738db2dd",
     "https://www.profitableratecpm.com/jbk2360sj?key=7fc034a14e94a1e760dfc819dc5eb505",
-    "https://www.profitableratecpm.com/fbt8k4cbrz?key=6634631adc5c52192a2c61249632f327",
-    "https://www.profitableratecpm.com/a86rveabe?key=b13c21aa3abd736eaf2b1bf3da878946",
+    "https://www.profitableratecpm.com/a5g3pzk5?key=13957d2a449284399821dbab142c2ec6",
+    "https://www.profitableratecpm.com/f9wpvhtsp?key=c7f3c20856996296cad1ee564734ea79",
+    "https://www.profitableratecpm.com/fju15epic?key=75c497855d00aad75ef1f883692e31fd",
     "https://airplaneprosperretreat.com/d1scx5uu50?key=e770636e59915c4077c34f1b2268f21f",
-    "https://airplaneprosperretreat.com/mgw8jg9j?key=2cdbad3d0086d44e15e788b7d8d74fb9",
-    "https://www.profitableratecpm.com/zjadxgam?key=7ae1a95bdf77d297973195885903d3e8",
-    "https://www.profitableratecpm.com/j456qaqd1?key=411d57cf6cc07880e8e893d30f42cb1a"
+    "https://airplaneprosperretreat.com/mcfstgd3?key=ed327ddb2a8bda88f677ba69834be848",
+    "https://www.profitableratecpm.com/wdzkexsc?key=5550131a782dd3cee62c7df164b486b6",
+    "https://www.profitableratecpm.com/ba9iyq1q0?key=10129c444eaf02bdd8fa0e2316eac45a"
   ];
 
   // Lien final de téléchargement (à remplacer avec le vrai lien plus tard)
@@ -43,9 +45,8 @@ const CapcutProPage = () => {
   const handleButtonClick = () => {
     // Si l'utilisateur n'a pas encore cliqué 10 fois
     if (clickCount < requiredClicks) {
-      // Sélectionner un lien de façon aléatoire
-      const randomIndex = Math.floor(Math.random() * adLinks.length);
-      const selectedLink = adLinks[randomIndex];
+      // Utiliser le lien correspondant à l'index actuel du compteur
+      const selectedLink = adLinks[clickCount];
       
       // Augmenter le compteur
       const newCount = clickCount + 1;
@@ -137,12 +138,9 @@ const CapcutProPage = () => {
                   </CardDescription>
                 </div>
                 
-                <div className="mt-8">
-                  <p className="text-sm text-gray-500 mb-2">
-                    {clickCount < requiredClicks 
-                      ? `Cliquez ${requiredClicks - clickCount} fois de plus pour débloquer le téléchargement`
-                      : "Votre fichier APK Capcut Pro est prêt à être téléchargé !"}
-                  </p>
+                <div className="mt-8 space-y-4">
+                  <ProductProgressBar currentCount={clickCount} requiredCount={requiredClicks} />
+                  
                   <Button 
                     onClick={handleButtonClick}
                     className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-lg py-6"
