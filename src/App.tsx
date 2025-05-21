@@ -18,6 +18,8 @@ import PayPalAccountPage from "./pages/PayPalAccountPage";
 import CapcutProPage from "./pages/CapcutProPage";
 import FantasmesCouplePage from "./pages/FantasmesCouplePage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import Settings from "./pages/Settings";
+import Payments from "./pages/Payments";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +44,8 @@ const App = () => (
               <Route path="/products" element={<Products />} />
               <Route path="/history" element={<History />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/payments" element={<Payments />} />
             </Route>
             
             <Route path="*" element={<NotFound />} />
