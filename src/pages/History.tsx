@@ -106,15 +106,23 @@ const History = () => {
       if (error) throw error;
       
       // Convert Supabase data to PaymentHistoryItem format
-      const formattedTransactions: PaymentHistoryItem[] = data.map(tx => ({
-        id: tx.id,
-        date: new Date(tx.created_at),
-        amount: tx.amount,
-        method: tx.payment_method as "momo" | "orange" | "paypal",
-        account: tx.account_details && typeof tx.account_details === 'object' ? 
-             (tx.account_details as Record<string, any>).number || '' : '',
-        status: tx.status as "completed" | "pending" | "failed"
-      }));
+      const formattedTransactions: PaymentHistoryItem[] = data.map(tx => {
+        // Safely extract account number
+        let accountNumber = '';
+        if (tx.account_details) {
+          const details = convertAccountDetails(tx.account_details);
+          accountNumber = details.number || '';
+        }
+        
+        return {
+          id: tx.id,
+          date: new Date(tx.created_at),
+          amount: tx.amount,
+          method: tx.payment_method as "momo" | "orange" | "paypal",
+          account: accountNumber,
+          status: tx.status as "completed" | "pending" | "failed"
+        };
+      });
       
       setTransactions(formattedTransactions);
     } catch (error) {

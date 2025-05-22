@@ -124,7 +124,7 @@ const Payments = () => {
           const { count, error: countError } = await supabase
             .from('clicks')
             .select('*', { count: 'exact', head: true })
-            .in('affiliate_link_id', linkIds as string[]);
+            .in('affiliate_link_id', linkIds);
             
           return { data: count || 0, error: countError };
         });
@@ -135,24 +135,35 @@ const Payments = () => {
       setPendingEarnings(weeklyData || 0);
       setTotalEarnings(clicksData || 0);
       
-      // Calculate monthly goal progress (simple example)
+      // Calculate monthly goal progress
       const currentDate = new Date();
       const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
       
       // Get clicks this month
-      const { data: monthlyClicks, error: monthlyError } = await supabase
-        .from('clicks')
+      // We need to properly get clicks for the current user's affiliate links
+      const { data: userLinks } = await supabase
+        .from('affiliate_links')
         .select('id')
-        .eq('affiliate_links.user_id', user.id)
-        .gte('clicked_at', startOfMonth.toISOString())
-        .count();
+        .eq('user_id', user.id);
       
-      if (monthlyError) throw monthlyError;
-      
-      setMonthlyGoal({
-        current: monthlyClicks || 0,
-        target: 10000 // Example target
-      });
+      if (userLinks && userLinks.length > 0) {
+        const linkIds = userLinks.map(link => link.id);
+        const { count: monthlyClicksCount } = await supabase
+          .from('clicks')
+          .select('*', { count: 'exact', head: true })
+          .in('affiliate_link_id', linkIds)
+          .gte('clicked_at', startOfMonth.toISOString());
+        
+        setMonthlyGoal({
+          current: monthlyClicksCount || 0,
+          target: 10000 // Example target
+        });
+      } else {
+        setMonthlyGoal({
+          current: 0,
+          target: 10000
+        });
+      }
       
     } catch (error) {
       console.error("Error fetching financial data:", error);
