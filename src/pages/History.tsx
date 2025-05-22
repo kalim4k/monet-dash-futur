@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -15,7 +14,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { WeeklyEarnings } from "@/components/WeeklyEarnings";
 import { ProductRevenuePieChart } from "@/components/ProductRevenuePieChart";
 import { toast } from "@/hooks/use-toast";
-import { convertAccountDetails, PaymentMethod } from "@/types/transaction";
+import { convertAccountDetails, PaymentMethod, PaymentMethodType } from "@/types/transaction";
+
+// Constante pour le revenu par clic
+const REVENUE_PER_CLICK = 10; // 10 FCFA par clic au lieu de 1 FCFA
 
 const History = () => {
   const { user } = useAuth();
@@ -40,43 +42,44 @@ const History = () => {
     try {
       setIsLoading(true);
       
-      // Get total earnings (1 FCFA per click)
-      const { data: totalEarnings, error: totalError } = await supabase.rpc(
-        'get_user_account_balance',
+      // Get total clicks (to calculate earnings at 10 FCFA per click)
+      const { data: clicksData, error: clicksError } = await supabase.rpc(
+        'get_affiliate_earnings',
         { user_id: userId }
       );
       
-      // Get weekly earnings (1 FCFA per click)
-      const { data: weeklyEarnings, error: weeklyError } = await supabase.rpc(
+      // Get weekly clicks (for weekly earnings at 10 FCFA per click)
+      const { data: weeklyClicksData, error: weeklyError } = await supabase.rpc(
         'get_affiliate_weekly_earnings',
         { user_id: userId }
       );
       
-      // Get total clicks
-      const { data: clicksData, error: clicksError } = await supabase
-        .from('affiliate_links')
-        .select('id')
-        .eq('user_id', userId)
-        .then(async ({ data, error }) => {
-          if (error) throw error;
-          if (!data || data.length === 0) return { data: 0, error: null };
-          
-          const linkIds = data.map(link => link.id);
-          const { count, error: countError } = await supabase
-            .from('clicks')
-            .select('*', { count: 'exact', head: true })
-            .in('affiliate_link_id', linkIds as string[]);
-            
-          return { data: count || 0, error: countError };
-        });
+      // Calculate total earnings (10 FCFA per click)
+      const totalEarnings = (clicksData || 0) * REVENUE_PER_CLICK;
       
-      if (totalError || weeklyError || clicksError) {
+      // Calculate weekly earnings (10 FCFA per click)
+      const weeklyEarnings = (weeklyClicksData || 0) * REVENUE_PER_CLICK;
+      
+      // Get total withdrawals
+      const { data: withdrawalsData, error: withdrawalsError } = await supabase
+        .from('transactions')
+        .select('amount')
+        .eq('user_id', userId)
+        .eq('transaction_type', 'withdrawal')
+        .in('status', ['completed', 'pending']);
+        
+      const totalWithdrawals = withdrawalsData ? withdrawalsData.reduce((sum, tx) => sum + tx.amount, 0) : 0;
+      
+      // Calculate available balance
+      const availableBalance = Math.max(0, totalEarnings - totalWithdrawals);
+      
+      if (clicksError || weeklyError || withdrawalsError) {
         throw new Error("Erreur lors du chargement des statistiques");
       }
       
       setEarnings({
-        total: totalEarnings || 0,
-        weekly: weeklyEarnings || 0,
+        total: availableBalance,
+        weekly: weeklyEarnings,
         clicks: clicksData || 0,
         bonus: 0 // Pour le moment, pas de système de bonus
       });
@@ -276,12 +279,8 @@ const History = () => {
       
       // Refresh earnings
       if (user?.id) {
-        const { data: updatedBalance } = await supabase.rpc(
-          'get_user_account_balance', 
-          { user_id: user.id }
-        );
-        
-        setEarnings(prev => ({ ...prev, total: updatedBalance || prev.total - data.amount }));
+        // Recalculate balance manually to avoid race conditions with the database
+        setEarnings(prev => ({ ...prev, total: Math.max(0, prev.total - data.amount) }));
       }
       
       toast({
@@ -328,6 +327,7 @@ const History = () => {
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Finances</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">Gérez vos revenus et retraits</p>
+            <p className="text-xs text-blue-500 mt-1">Nouveau: gagnez 10 FCFA par clic!</p>
           </div>
           
           {/* Financial Overview Cards */}
@@ -343,7 +343,7 @@ const History = () => {
               <CardContent>
                 <div className="text-3xl font-bold">{formatCurrency(earnings.total)}</div>
                 <p className="text-xs opacity-80 mt-1">
-                  Minimum de retrait: {formatCurrency(getCurrentTier())}
+                  10 FCFA par clic
                 </p>
               </CardContent>
             </Card>
@@ -357,9 +357,9 @@ const History = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{formatCurrency(totalIncome)}</div>
+                <div className="text-3xl font-bold">{formatCurrency(earnings.clicks * REVENUE_PER_CLICK)}</div>
                 <p className="text-xs opacity-80 mt-1">
-                  Revenus cumulés
+                  {earnings.clicks.toLocaleString()} clics
                 </p>
               </CardContent>
             </Card>

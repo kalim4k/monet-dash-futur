@@ -13,6 +13,9 @@ interface ProductStats {
   revenue: number;
 }
 
+// Constante pour le revenu par clic
+const REVENUE_PER_CLICK = 10; // 10 FCFA par clic au lieu de 1 FCFA
+
 export function ClicksPerProductChart() {
   const [products, setProducts] = useState<ProductStats[]>([]);
   const [loading, setLoading] = useState(true);
@@ -119,7 +122,7 @@ export function ClicksPerProductChart() {
         return;
       }
       
-      // Get clicks for all links in a single query - Fix the TypeScript error here by ensuring allLinkIds is a string array
+      // Get clicks for all links in a single query
       const { data: clicksData, error: clicksError } = await supabase
         .from('clicks')
         .select('affiliate_link_id, id')
@@ -156,7 +159,7 @@ export function ClicksPerProductChart() {
           id: product.id,
           name: product.name,
           clicks: totalClicks,
-          revenue: totalClicks // 1 FCFA per click
+          revenue: totalClicks * REVENUE_PER_CLICK // 10 FCFA par clic
         };
       });
       

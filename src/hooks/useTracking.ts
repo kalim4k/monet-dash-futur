@@ -1,8 +1,10 @@
-
 import { useEffect, useState, useCallback } from "react";
 import { getAffiliateParamsFromUrl, recordProductClick } from "@/services/trackingService";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
+
+// Constante pour le revenu par clic
+const REVENUE_PER_CLICK = 10; // 10 FCFA par clic au lieu de 1 FCFA
 
 /**
  * Hook pour gérer le suivi des clics sur les pages de produits
@@ -134,7 +136,7 @@ export const useTracking = (productId: string) => {
         );
         
         if (result.success) {
-          console.log("Page vue comptabilisée avec succès");
+          console.log(`Page vue comptabilisée avec succès (${REVENUE_PER_CLICK} FCFA)`);
           setIsTracked(true);
           
           // Stocker en session que cette page vue a déjà été comptabilisée

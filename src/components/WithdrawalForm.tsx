@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PaymentMethodType } from "@/types/transaction";
 
 // Définir les paliers de retrait
 const WITHDRAWAL_TIERS = {
@@ -42,7 +44,7 @@ interface WithdrawalFormProps {
   balance: number; // Solde disponible de l'utilisateur
   savedMethods: {
     id: string;
-    type: "momo" | "orange" | "paypal" | "wave" | "moov" | "yass";
+    type: PaymentMethodType;
     accounts: PaymentAccount[];
   }[];
   onSubmit: (data: WithdrawalFormValues) => void;
@@ -52,6 +54,7 @@ interface WithdrawalFormProps {
 export function WithdrawalForm({ balance, savedMethods, onSubmit, withdrawalCount = 0 }: WithdrawalFormProps) {
   const [selectedMethod, setSelectedMethod] = useState<string>("");
   const [amountError, setAmountError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>(`tier-${withdrawalCount + 1}`);
   
   // Déterminer le palier actuel en fonction du nombre de retraits
   const getCurrentTier = () => {
@@ -63,8 +66,8 @@ export function WithdrawalForm({ balance, savedMethods, onSubmit, withdrawalCoun
   const minWithdrawal = getCurrentTier();
   
   // Déterminer quelles méthodes de paiement sont disponibles en fonction du palier
-  const getAvailableMethods = () => {
-    if (withdrawalCount === 0) {
+  const getAvailableMethods = (tierNumber: number) => {
+    if (tierNumber === 1) {
       // Premier retrait: PayPal uniquement
       return savedMethods.filter(method => method.type === "paypal");
     } else {
@@ -73,7 +76,7 @@ export function WithdrawalForm({ balance, savedMethods, onSubmit, withdrawalCoun
     }
   };
   
-  const availableMethods = getAvailableMethods();
+  const availableMethods = getAvailableMethods(withdrawalCount + 1);
   
   // Sélectionner automatiquement la première méthode disponible
   useEffect(() => {
@@ -174,6 +177,34 @@ export function WithdrawalForm({ balance, savedMethods, onSubmit, withdrawalCoun
       default: return type;
     }
   };
+  
+  // Structure des infos de paliers
+  const tierInfo = [
+    {
+      id: "tier-1",
+      label: "Palier 1",
+      amount: WITHDRAWAL_TIERS.FIRST,
+      methods: ["paypal"],
+      description: "Premier retrait - PayPal uniquement"
+    },
+    {
+      id: "tier-2",
+      label: "Palier 2",
+      amount: WITHDRAWAL_TIERS.SECOND,
+      methods: ["paypal", "momo", "orange", "wave", "moov", "yass"],
+      description: "Deuxième retrait - Toutes les méthodes"
+    },
+    {
+      id: "tier-3",
+      label: "Palier 3",
+      amount: WITHDRAWAL_TIERS.THIRD,
+      methods: ["paypal", "momo", "orange", "wave", "moov", "yass"],
+      description: "Troisième retrait et suivants - Toutes les méthodes"
+    }
+  ];
+  
+  // L'index du palier actuel
+  const currentTierIndex = Math.min(withdrawalCount, 2);
 
   return (
     <Card className="bg-gradient-to-br from-white to-gray-50 border shadow-sm">
@@ -188,18 +219,70 @@ export function WithdrawalForm({ balance, savedMethods, onSubmit, withdrawalCoun
       </CardHeader>
       
       <CardContent>
+        {/* Onglets de paliers de retrait */}
+        <Tabs 
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="mb-6"
+        >
+          <TabsList className="grid grid-cols-3 mb-4">
+            {tierInfo.map((tier, index) => (
+              <TabsTrigger 
+                key={tier.id} 
+                value={tier.id}
+                disabled={balance < tier.amount}
+                className="text-xs sm:text-sm"
+              >
+                {tier.label}
+                <span className="hidden sm:inline ml-1">
+                  ({formatCurrency(tier.amount)})
+                </span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          
+          {tierInfo.map((tier, index) => (
+            <TabsContent key={tier.id} value={tier.id} className="space-y-4">
+              <Alert className={`${index === currentTierIndex ? 'bg-blue-50 text-blue-800 border-blue-200' : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                <AlertCircle className={`h-4 w-4 ${index === currentTierIndex ? 'text-blue-500' : 'text-gray-400'}`} />
+                <AlertDescription className="text-sm">
+                  {tier.description}. Montant minimum: <span className="font-medium">{formatCurrency(tier.amount)}</span>
+                </AlertDescription>
+              </Alert>
+
+              <div>
+                <p className="text-sm font-medium mb-2">Moyens de paiement disponibles:</p>
+                <div className="flex flex-wrap gap-2">
+                  {tier.methods.map(methodType => (
+                    <div key={methodType} className="flex items-center bg-gray-100 rounded px-2 py-1">
+                      <img 
+                        src={getMethodLogo(methodType)} 
+                        alt={getMethodName(methodType)}
+                        className="h-4 w-4 mr-1.5 object-contain"
+                      />
+                      <span className="text-xs font-medium">{getMethodName(methodType)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {index === currentTierIndex && (
+                <p className="text-sm font-medium text-green-600">
+                  C'est votre palier actuel
+                </p>
+              )}
+              
+              {index > currentTierIndex && withdrawalCount < index && (
+                <p className="text-sm font-medium text-amber-600">
+                  Disponible après {withdrawalCount > 0 ? "votre prochain retrait" : "votre premier retrait"}
+                </p>
+              )}
+            </TabsContent>
+          ))}
+        </Tabs>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-6">
-            {/* Alerte sur le palier actuel */}
-            <Alert className="bg-blue-50 text-blue-800 border-blue-200">
-              <AlertCircle className="h-4 w-4 text-blue-500" />
-              <AlertDescription className="text-sm">
-                Vous êtes au {withdrawalCount === 0 ? "premier" : withdrawalCount === 1 ? "deuxième" : "troisième"} palier de retrait.
-                Montant minimum: {formatCurrency(minWithdrawal)}
-                {withdrawalCount === 0 && " (PayPal uniquement)"}
-              </AlertDescription>
-            </Alert>
-            
             <FormField
               control={form.control}
               name="method"
