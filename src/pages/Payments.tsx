@@ -473,29 +473,6 @@ const Payments = () => {
           
           {/* Payments Content */}
           <Tabs defaultValue="dashboard" className="space-y-6">
-            <TabsList className="grid grid-cols-5 mb-8 w-full md:w-auto">
-              <TabsTrigger value="dashboard" className="flex flex-col items-center gap-2 py-3 sm:flex-row sm:gap-3">
-                <BarChart4 className="h-5 w-5" />
-                <span className="hidden sm:inline">Tableau de bord</span>
-              </TabsTrigger>
-              <TabsTrigger value="history" className="flex flex-col items-center gap-2 py-3 sm:flex-row sm:gap-3">
-                <Clock className="h-5 w-5" />
-                <span className="hidden sm:inline">Historique</span>
-              </TabsTrigger>
-              <TabsTrigger value="withdrawals" className="flex flex-col items-center gap-2 py-3 sm:flex-row sm:gap-3">
-                <ArrowDownToLine className="h-5 w-5" />
-                <span className="hidden sm:inline">Retraits</span>
-              </TabsTrigger>
-              <TabsTrigger value="methods" className="flex flex-col items-center gap-2 py-3 sm:flex-row sm:gap-3">
-                <Wallet className="h-5 w-5" />
-                <span className="hidden sm:inline">Méthodes</span>
-              </TabsTrigger>
-              <TabsTrigger value="tax" className="flex flex-col items-center gap-2 py-3 sm:flex-row sm:gap-3">
-                <FileText className="h-5 w-5" />
-                <span className="hidden sm:inline">Fiscalité</span>
-              </TabsTrigger>
-            </TabsList>
-            
             {/* Financial Dashboard */}
             <TabsContent value="dashboard" className="space-y-6">
               {isLoading ? (
@@ -1215,5 +1192,3 @@ const Payments = () => {
 };
 
 export default Payments;
-
-</edits_to_apply>
