@@ -1,25 +1,31 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowDown, Wallet } from "lucide-react";
+import { ArrowDown, Wallet, AlertCircle, PaypalIcon } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const MIN_WITHDRAWAL = 50000;
+// Définir les paliers de retrait
+const WITHDRAWAL_TIERS = {
+  FIRST: 1000,
+  SECOND: 15000,
+  THIRD: 50000
+};
 
-// Define withdrawal form schema
+// Définir le schéma de validation du formulaire de retrait
 const withdrawalSchema = z.object({
   method: z.string().min(1, "Veuillez sélectionner une méthode de paiement"),
   account: z.string().min(1, "Veuillez sélectionner un compte"),
   amount: z
     .number()
-    .min(MIN_WITHDRAWAL, `Le montant minimum de retrait est de ${MIN_WITHDRAWAL.toLocaleString()} FCFA`)
+    .min(WITHDRAWAL_TIERS.FIRST, `Le montant minimum de retrait est de ${WITHDRAWAL_TIERS.FIRST.toLocaleString()} FCFA`)
     .max(10000000, "Le montant maximum de retrait est de 10,000,000 FCFA"),
 });
 
@@ -33,25 +39,59 @@ interface PaymentAccount {
 }
 
 interface WithdrawalFormProps {
-  balance: number; // User's current available balance
+  balance: number; // Solde disponible de l'utilisateur
   savedMethods: {
     id: string;
-    type: "momo" | "orange" | "paypal";
+    type: "momo" | "orange" | "paypal" | "wave" | "moov" | "yass";
     accounts: PaymentAccount[];
   }[];
   onSubmit: (data: WithdrawalFormValues) => void;
+  withdrawalCount?: number; // Nombre de retraits déjà effectués
 }
 
-export function WithdrawalForm({ balance, savedMethods, onSubmit }: WithdrawalFormProps) {
-  const [selectedMethod, setSelectedMethod] = useState<string>(
-    savedMethods.length > 0 ? savedMethods[0].type : ""
-  );
+export function WithdrawalForm({ balance, savedMethods, onSubmit, withdrawalCount = 0 }: WithdrawalFormProps) {
+  const [selectedMethod, setSelectedMethod] = useState<string>("");
   const [amountError, setAmountError] = useState<string | null>(null);
   
-  const accounts = savedMethods
+  // Déterminer le palier actuel en fonction du nombre de retraits
+  const getCurrentTier = () => {
+    if (withdrawalCount === 0) return WITHDRAWAL_TIERS.FIRST;
+    if (withdrawalCount === 1) return WITHDRAWAL_TIERS.SECOND;
+    return WITHDRAWAL_TIERS.THIRD;
+  };
+  
+  const minWithdrawal = getCurrentTier();
+  
+  // Déterminer quelles méthodes de paiement sont disponibles en fonction du palier
+  const getAvailableMethods = () => {
+    if (withdrawalCount === 0) {
+      // Premier retrait: PayPal uniquement
+      return savedMethods.filter(method => method.type === "paypal");
+    } else {
+      // 2ème et 3ème retraits: toutes les méthodes
+      return savedMethods;
+    }
+  };
+  
+  const availableMethods = getAvailableMethods();
+  
+  // Sélectionner automatiquement la première méthode disponible
+  useEffect(() => {
+    if (availableMethods.length > 0 && !selectedMethod) {
+      setSelectedMethod(availableMethods[0].type);
+      form.setValue("method", availableMethods[0].type);
+      
+      const accounts = availableMethods[0].accounts;
+      if (accounts && accounts.length > 0) {
+        form.setValue("account", accounts[0].id);
+      }
+    }
+  }, [availableMethods]);
+  
+  const accounts = availableMethods
     .find(method => method.type === selectedMethod)?.accounts || [];
 
-  // Format currency in FCFA
+  // Formater la devise en FCFA
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("fr-FR", {
       style: "currency",
@@ -63,7 +103,7 @@ export function WithdrawalForm({ balance, savedMethods, onSubmit }: WithdrawalFo
   const form = useForm<WithdrawalFormValues>({
     resolver: zodResolver(withdrawalSchema),
     defaultValues: {
-      method: savedMethods.length > 0 ? savedMethods[0].type : "",
+      method: availableMethods.length > 0 ? availableMethods[0].type : "",
       account: accounts.length > 0 ? accounts[0].id : "",
       amount: 0,
     },
@@ -73,8 +113,8 @@ export function WithdrawalForm({ balance, savedMethods, onSubmit }: WithdrawalFo
     setSelectedMethod(value);
     form.setValue("method", value);
     
-    // Reset account when method changes
-    const newAccounts = savedMethods.find(method => method.type === value)?.accounts || [];
+    // Réinitialiser le compte lors du changement de méthode
+    const newAccounts = availableMethods.find(method => method.type === value)?.accounts || [];
     if (newAccounts.length > 0) {
       form.setValue("account", newAccounts[0].id);
     } else {
@@ -88,8 +128,8 @@ export function WithdrawalForm({ balance, savedMethods, onSubmit }: WithdrawalFo
       return;
     }
     
-    if (values.amount < MIN_WITHDRAWAL) {
-      setAmountError(`Le montant minimum de retrait est de ${MIN_WITHDRAWAL.toLocaleString()} FCFA`);
+    if (values.amount < minWithdrawal) {
+      setAmountError(`Le montant minimum de retrait est de ${minWithdrawal.toLocaleString()} FCFA pour ce palier`);
       return;
     }
     
@@ -101,12 +141,38 @@ export function WithdrawalForm({ balance, savedMethods, onSubmit }: WithdrawalFo
       description: `Votre demande de retrait de ${formatCurrency(values.amount)} a été enregistrée et est en cours de traitement.`,
     });
     
-    // Reset form
+    // Réinitialiser le formulaire
     form.reset({
       method: selectedMethod,
       account: form.getValues("account"),
       amount: 0,
     });
+  };
+  
+  // Obtenir l'URL du logo en fonction du type de méthode
+  const getMethodLogo = (type: string) => {
+    switch (type) {
+      case "momo": return "https://celinaroom.com/wp-content/uploads/2025/01/mtn-1-Copie.jpg";
+      case "orange": return "https://celinaroom.com/wp-content/uploads/2025/01/Orange-Money-recrute-pour-ce-poste-22-Mars-2023.png";
+      case "paypal": return "https://celinaroom.com/wp-content/uploads/2025/01/ENIGME3.png";
+      case "wave": return "https://celinaroom.com/wp-content/uploads/2025/02/Design-sans-titre4.png";
+      case "moov": return "https://celinaroom.com/wp-content/uploads/2025/01/Moov_Money_Flooz.png";
+      case "yass": return "https://celinaroom.com/wp-content/uploads/2025/05/mixx-by-yas.jpg";
+      default: return "";
+    }
+  };
+  
+  // Obtenir le nom complet de la méthode de paiement
+  const getMethodName = (type: string) => {
+    switch (type) {
+      case "momo": return "MTN Mobile Money";
+      case "orange": return "Orange Money";
+      case "paypal": return "PayPal";
+      case "wave": return "Wave";
+      case "moov": return "Moov Money";
+      case "yass": return "Yass";
+      default: return type;
+    }
   };
 
   return (
@@ -124,6 +190,16 @@ export function WithdrawalForm({ balance, savedMethods, onSubmit }: WithdrawalFo
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-6">
+            {/* Alerte sur le palier actuel */}
+            <Alert className="bg-blue-50 text-blue-800 border-blue-200">
+              <AlertCircle className="h-4 w-4 text-blue-500" />
+              <AlertDescription className="text-sm">
+                Vous êtes au {withdrawalCount === 0 ? "premier" : withdrawalCount === 1 ? "deuxième" : "troisième"} palier de retrait.
+                Montant minimum: {formatCurrency(minWithdrawal)}
+                {withdrawalCount === 0 && " (PayPal uniquement)"}
+              </AlertDescription>
+            </Alert>
+            
             <FormField
               control={form.control}
               name="method"
@@ -140,11 +216,18 @@ export function WithdrawalForm({ balance, savedMethods, onSubmit }: WithdrawalFo
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {savedMethods.map((method) => (
-                        <SelectItem key={method.type} value={method.type}>
-                          {method.type === "momo" && "MTN Mobile Money"}
-                          {method.type === "orange" && "Orange Money"}
-                          {method.type === "paypal" && "PayPal"}
+                      {availableMethods.map((method) => (
+                        <SelectItem key={method.type} value={method.type} className="flex items-center">
+                          <div className="flex items-center gap-2">
+                            {method.type && (
+                              <img 
+                                src={getMethodLogo(method.type)} 
+                                alt={getMethodName(method.type)} 
+                                className="h-5 w-5 object-contain" 
+                              />
+                            )}
+                            {getMethodName(method.type)}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -193,7 +276,7 @@ export function WithdrawalForm({ balance, savedMethods, onSubmit }: WithdrawalFo
                     <div className="relative">
                       <Input
                         type="number"
-                        min={MIN_WITHDRAWAL}
+                        min={minWithdrawal}
                         max={balance}
                         className="pr-16"
                         {...field}
@@ -213,7 +296,7 @@ export function WithdrawalForm({ balance, savedMethods, onSubmit }: WithdrawalFo
             <div className="border-t border-gray-100 pt-4">
               <div className="flex items-center justify-between text-sm mb-4">
                 <span className="text-muted-foreground">Montant minimum</span>
-                <span className="font-medium">{formatCurrency(MIN_WITHDRAWAL)}</span>
+                <span className="font-medium">{formatCurrency(minWithdrawal)}</span>
               </div>
               
               <div className="flex items-center justify-between text-sm">
@@ -226,7 +309,7 @@ export function WithdrawalForm({ balance, savedMethods, onSubmit }: WithdrawalFo
               <Button 
                 type="submit" 
                 className="w-full sm:w-auto gap-2"
-                disabled={balance < MIN_WITHDRAWAL}
+                disabled={balance < minWithdrawal}
               >
                 <ArrowDown className="h-4 w-4" />
                 <span>Demander le retrait</span>

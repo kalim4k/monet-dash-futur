@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -27,6 +28,9 @@ const History = () => {
   
   // Payment methods state
   const [paymentMethods, setPaymentMethods] = useState(generateMockPaymentMethods());
+  
+  // Withdrawal count for tier system
+  const [withdrawalCount, setWithdrawalCount] = useState(0);
   
   // Loading state
   const [isLoading, setIsLoading] = useState(true);
@@ -83,6 +87,18 @@ const History = () => {
       // Load payment methods
       await loadPaymentMethods(userId);
       
+      // Calculate number of successful withdrawals for tier system
+      const { count: completedWithdrawalCount, error: withdrawalError } = await supabase
+        .from('transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('transaction_type', 'withdrawal')
+        .in('status', ['completed', 'pending']);
+        
+      if (!withdrawalError) {
+        setWithdrawalCount(completedWithdrawalCount || 0);
+      }
+      
     } catch (error) {
       console.error("Erreur lors du chargement des statistiques:", error);
       toast({
@@ -119,7 +135,7 @@ const History = () => {
           id: tx.id,
           date: new Date(tx.created_at),
           amount: tx.amount,
-          method: tx.payment_method as "momo" | "orange" | "paypal",
+          method: tx.payment_method as "momo" | "orange" | "paypal" | "wave" | "moov" | "yass",
           account: accountNumber,
           status: tx.status as "completed" | "pending" | "failed"
         };
@@ -144,7 +160,7 @@ const History = () => {
       if (data && data.length > 0) {
         // Group payment methods by type
         const methodsByType = data.reduce((acc, method) => {
-          const type = method.type as "momo" | "orange" | "paypal";
+          const type = method.type as "momo" | "orange" | "paypal" | "wave" | "moov" | "yass";
           if (!acc[type]) {
             acc[type] = {
               id: type,
@@ -162,6 +178,41 @@ const History = () => {
         }, {} as Record<string, any>);
         
         setPaymentMethods(Object.values(methodsByType));
+      } else {
+        // Si aucune méthode n'est trouvée, ajouter au moins les méthodes par défaut
+        const defaultMethods = [
+          {
+            id: "paypal",
+            type: "paypal" as "paypal",
+            accounts: []
+          },
+          {
+            id: "momo",
+            type: "momo" as "momo",
+            accounts: []
+          },
+          {
+            id: "orange",
+            type: "orange" as "orange",
+            accounts: []
+          },
+          {
+            id: "wave",
+            type: "wave" as "wave",
+            accounts: []
+          },
+          {
+            id: "moov",
+            type: "moov" as "moov",
+            accounts: []
+          },
+          {
+            id: "yass",
+            type: "yass" as "yass",
+            accounts: []
+          }
+        ];
+        setPaymentMethods(defaultMethods);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des méthodes de paiement:", error);
@@ -193,7 +244,15 @@ const History = () => {
             id: data.account,
             number: paymentMethods.find(m => m.type === data.method)?.accounts.find(a => a.id === data.account)?.number || ""
           },
-          description: `Retrait vers ${data.method === 'momo' ? 'MTN Mobile Money' : data.method === 'orange' ? 'Orange Money' : 'PayPal'}`
+          description: `Retrait vers ${
+            data.method === 'momo' ? 'MTN Mobile Money' : 
+            data.method === 'orange' ? 'Orange Money' : 
+            data.method === 'paypal' ? 'PayPal' : 
+            data.method === 'wave' ? 'Wave' : 
+            data.method === 'moov' ? 'Moov Money' : 
+            data.method === 'yass' ? 'Yass' : 
+            'Autre'
+          }`
         })
         .select()
         .single();
@@ -205,7 +264,7 @@ const History = () => {
         id: transactionData.id,
         date: new Date(transactionData.created_at),
         amount: transactionData.amount,
-        method: transactionData.payment_method as "momo" | "orange" | "paypal",
+        method: transactionData.payment_method as "momo" | "orange" | "paypal" | "wave" | "moov" | "yass",
         account: transactionData.account_details && typeof transactionData.account_details === 'object' ? 
           (convertAccountDetails(transactionData.account_details).number || '') : '',
         status: "pending"
@@ -213,6 +272,7 @@ const History = () => {
       
       // Update transactions and refresh balance
       setTransactions([newTransaction, ...transactions]);
+      setWithdrawalCount(prevCount => prevCount + 1);
       
       // Refresh earnings
       if (user?.id) {
@@ -251,6 +311,13 @@ const History = () => {
   const totalWithdrawal = transactions.filter(tx => tx.status !== "failed").reduce((sum, tx) => sum + tx.amount, 0);
   const pendingAmount = transactions.filter(tx => tx.status === "pending").reduce((sum, tx) => sum + tx.amount, 0);
 
+  // Déterminer le palier actuel
+  const getCurrentTier = () => {
+    if (withdrawalCount === 0) return 1000;
+    if (withdrawalCount === 1) return 15000;
+    return 50000;
+  };
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 overflow-x-hidden">
       <Sidebar />
@@ -276,7 +343,7 @@ const History = () => {
               <CardContent>
                 <div className="text-3xl font-bold">{formatCurrency(earnings.total)}</div>
                 <p className="text-xs opacity-80 mt-1">
-                  Minimum de retrait: 50,000 FCFA
+                  Minimum de retrait: {formatCurrency(getCurrentTier())}
                 </p>
               </CardContent>
             </Card>
@@ -378,6 +445,7 @@ const History = () => {
                     balance={earnings.total} 
                     savedMethods={paymentMethods} 
                     onSubmit={handleWithdrawal} 
+                    withdrawalCount={withdrawalCount}
                   />
                 </TabsContent>
               </div>

@@ -3,7 +3,7 @@ import { Json } from "@/integrations/supabase/types";
 
 export type TransactionType = "payment" | "withdrawal" | "bonus";
 export type TransactionStatus = "completed" | "pending" | "failed";
-export type PaymentMethodType = "momo" | "orange" | "paypal" | "bank";
+export type PaymentMethodType = "momo" | "orange" | "paypal" | "bank" | "wave" | "moov" | "yass";
 
 export interface Transaction {
   id: string;

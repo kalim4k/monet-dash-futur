@@ -1,21 +1,13 @@
 
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { formatDate } from "@/lib/utils";
-import { CreditCard, Wallet } from "lucide-react";
+import { Wallet, AlertCircle, Clock, CheckCircle } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 export interface PaymentHistoryItem {
   id: string;
   date: Date;
   amount: number;
-  method: "momo" | "orange" | "paypal";
+  method: "momo" | "orange" | "paypal" | "wave" | "moov" | "yass";
   account: string;
   status: "completed" | "pending" | "failed";
 }
@@ -25,122 +17,143 @@ interface PaymentHistoryTableProps {
 }
 
 export function PaymentHistoryTable({ transactions }: PaymentHistoryTableProps) {
-  // Function to format currency in FCFA
+  // Format currency function
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("fr-FR", {
       style: "currency",
       currency: "XAF",
-      minimumFractionDigits: 0,
+      minimumFractionDigits: 0
     }).format(amount);
   };
-
-  // Function to get payment method display info
-  const getMethodInfo = (method: string) => {
+  
+  // Format date function
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat("fr-FR", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric"
+    }).format(date);
+  };
+  
+  // Get method display name
+  const getMethodName = (method: string) => {
     switch (method) {
-      case "momo":
-        return {
-          name: "MTN Mobile Money",
-          color: "bg-[#FFCB05]",
-          textColor: "text-black",
-          icon: <Wallet className="h-4 w-4" />,
-        };
-      case "orange":
-        return {
-          name: "Orange Money",
-          color: "bg-[#FF6600]",
-          textColor: "text-white",
-          icon: <Wallet className="h-4 w-4" />,
-        };
-      case "paypal":
-        return {
-          name: "PayPal",
-          color: "bg-[#0070BA]",
-          textColor: "text-white",
-          icon: <CreditCard className="h-4 w-4" />,
-        };
-      default:
-        return {
-          name: "Autre",
-          color: "bg-gray-500",
-          textColor: "text-white",
-          icon: <CreditCard className="h-4 w-4" />,
-        };
+      case "momo": return "MTN Mobile Money";
+      case "orange": return "Orange Money";
+      case "paypal": return "PayPal";
+      case "wave": return "Wave";
+      case "moov": return "Moov Money";
+      case "yass": return "Yass";
+      default: return method;
     }
   };
-
-  // Function to get status badge style
-  const getStatusBadge = (status: string) => {
+  
+  // Get method icon/logo
+  const getMethodLogo = (method: string) => {
+    switch (method) {
+      case "momo": return "https://celinaroom.com/wp-content/uploads/2025/01/mtn-1-Copie.jpg";
+      case "orange": return "https://celinaroom.com/wp-content/uploads/2025/01/Orange-Money-recrute-pour-ce-poste-22-Mars-2023.png";
+      case "paypal": return "https://celinaroom.com/wp-content/uploads/2025/01/ENIGME3.png";
+      case "wave": return "https://celinaroom.com/wp-content/uploads/2025/02/Design-sans-titre4.png";
+      case "moov": return "https://celinaroom.com/wp-content/uploads/2025/01/Moov_Money_Flooz.png";
+      case "yass": return "https://celinaroom.com/wp-content/uploads/2025/05/mixx-by-yas.jpg";
+      default: return "";
+    }
+  };
+  
+  // Get status color class
+  const getStatusColorClass = (status: string) => {
     switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "failed":
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+      case "completed": return "bg-green-50 text-green-700 border-green-200";
+      case "pending": return "bg-amber-50 text-amber-700 border-amber-200";
+      case "failed": return "bg-red-50 text-red-700 border-red-200";
+      default: return "bg-gray-50 text-gray-700 border-gray-200";
+    }
+  };
+  
+  // Get status text
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case "completed": return "Complété";
+      case "pending": return "En cours";
+      case "failed": return "Échoué";
+      default: return status;
+    }
+  };
+  
+  // Get status icon
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "completed": return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case "pending": return <Clock className="h-4 w-4 text-amber-500" />;
+      case "failed": return <AlertCircle className="h-4 w-4 text-red-500" />;
+      default: return null;
     }
   };
 
   return (
-    <div className="rounded-lg border shadow-sm overflow-hidden bg-white">
-      <div className="overflow-x-auto">
-        <Table>
-          <TableCaption>Historique des retraits récents</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px] md:w-[180px]">Date</TableHead>
-              <TableHead>Montant</TableHead>
-              <TableHead className="w-[80px] sm:w-auto">Méthode</TableHead>
-              <TableHead className="hidden md:table-cell">Compte</TableHead>
-              <TableHead className="w-[90px] md:w-auto">Statut</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {transactions.length === 0 ? (
+    <div>
+      {transactions.length === 0 ? (
+        <div className="text-center py-10">
+          <Wallet className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+          <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300">Aucune transaction</h3>
+          <p className="text-gray-500 dark:text-gray-400 max-w-sm mx-auto mt-1">
+            Vous n'avez pas encore effectué de retrait. Vos transactions apparaîtront ici.
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-auto">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                  Aucun historique de retrait disponible
-                </TableCell>
+                <TableHead>Date</TableHead>
+                <TableHead>Méthode</TableHead>
+                <TableHead>Compte</TableHead>
+                <TableHead>Montant</TableHead>
+                <TableHead>Statut</TableHead>
               </TableRow>
-            ) : (
-              transactions.map((transaction) => {
-                const methodInfo = getMethodInfo(transaction.method);
-                const statusBadge = getStatusBadge(transaction.status);
-                
-                return (
-                  <TableRow key={transaction.id}>
-                    <TableCell className="font-medium text-xs sm:text-sm">
-                      {formatDate(transaction.date)}
-                    </TableCell>
-                    <TableCell className="font-semibold text-xs sm:text-sm">
-                      {formatCurrency(transaction.amount)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 sm:gap-2">
-                        <div className={`h-5 w-5 sm:h-6 sm:w-6 rounded-md ${methodInfo.color} flex items-center justify-center ${methodInfo.textColor}`}>
-                          {methodInfo.icon}
-                        </div>
-                        <span className="hidden sm:inline text-xs sm:text-sm">{methodInfo.name}</span>
+            </TableHeader>
+            <TableBody>
+              {transactions.map((transaction) => (
+                <TableRow key={transaction.id}>
+                  <TableCell>
+                    <div className="font-medium">{formatDate(transaction.date)}</div>
+                    <div className="text-xs text-gray-500">ID: {transaction.id.substring(0, 8)}</div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-md overflow-hidden flex items-center justify-center bg-gray-100">
+                        {transaction.method && (
+                          <img 
+                            src={getMethodLogo(transaction.method)} 
+                            alt={getMethodName(transaction.method)} 
+                            className="h-full w-full object-cover" 
+                          />
+                        )}
                       </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell text-muted-foreground text-xs sm:text-sm">
-                      {transaction.account}
-                    </TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center rounded-full border px-1.5 py-0.5 sm:px-2 sm:py-1 text-xs font-semibold ${statusBadge}`}>
-                        {transaction.status === "completed" && "Terminé"}
-                        {transaction.status === "pending" && "En attente"}
-                        {transaction.status === "failed" && "Échoué"}
+                      <span>{getMethodName(transaction.method)}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{transaction.account}</TableCell>
+                  <TableCell className="font-medium">
+                    {formatCurrency(transaction.amount)}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={getStatusColorClass(transaction.status)}>
+                      <span className="flex items-center gap-1">
+                        {getStatusIcon(transaction.status)}
+                        {getStatusText(transaction.status)}
                       </span>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
-};
+}
