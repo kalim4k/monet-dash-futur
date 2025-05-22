@@ -1,59 +1,161 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Twitter } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-export function SocialNetworksCard() {
+export interface UserSettings {
+  id?: string;
+  user_id?: string;
+  notification_email?: boolean;
+  notification_app?: boolean;
+  theme?: string;
+  language?: string;
+  dashboard_widgets?: {
+    recentClicks?: boolean;
+    earningsChart?: boolean;
+    topAffiliates?: boolean;
+    productPerformance?: boolean;
+  };
+  auto_withdrawal?: boolean;
+  auto_withdrawal_threshold?: number;
+  auto_withdrawal_method_id?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface SocialNetworksCardProps {
+  userSettings: UserSettings | null;
+  isLoading: boolean;
+}
+
+export const SocialNetworksCard = ({ userSettings, isLoading }: SocialNetworksCardProps) => {
+  const { toast } = useToast();
+  const [settings, setSettings] = useState<UserSettings | null>(userSettings);
+  const [saving, setSaving] = useState(false);
+
+  // Handler to toggle notification settings
+  const handleToggle = async (field: keyof UserSettings, value: boolean) => {
+    if (!settings?.id) return;
+    
+    try {
+      setSaving(true);
+      
+      // Update local state first for immediate feedback
+      setSettings(prev => prev ? { ...prev, [field]: value } : null);
+      
+      // Update in database
+      const { error } = await supabase
+        .from('user_settings')
+        .update({ [field]: value, updated_at: new Date().toISOString() })
+        .eq('id', settings.id);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Paramètres mis à jour",
+        description: "Vos préférences ont été enregistrées.",
+      });
+      
+    } catch (error) {
+      console.error("Error updating settings:", error);
+      // Revert state on error
+      setSettings(userSettings);
+      
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour vos paramètres.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Réseaux Sociaux</CardTitle>
-        <CardDescription>Suivez-nous sur nos réseaux sociaux</CardDescription>
+        <CardTitle>Paramètres de notifications</CardTitle>
+        <CardDescription>Gérez comment et quand vous recevez des notifications</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <Card className="flex-1 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-[#0088cc] flex items-center justify-center">
-                  <Twitter className="h-6 w-6 text-white" />
-                </div>
-                <CardTitle>Twitter</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="mb-4">
-                Rejoignez notre communauté Twitter pour recevoir des offres exclusives et les dernières nouvelles
-              </CardDescription>
-              <Button className="w-full bg-[#0088cc] hover:bg-[#0088cc]/90">
-                S'abonner
-              </Button>
-            </CardContent>
-          </Card>
+        {/* Email Notifications */}
+        <div className="flex items-center justify-between space-x-2">
+          <div>
+            <h3 className="font-medium">Notifications par email</h3>
+            <p className="text-sm text-muted-foreground">Recevez des notifications importantes par email</p>
+          </div>
+          <Switch 
+            id="notification_email" 
+            checked={settings?.notification_email || false} 
+            onCheckedChange={(value) => handleToggle('notification_email', value)}
+            disabled={isLoading || saving}
+          />
+        </div>
+        
+        {/* App Notifications */}
+        <div className="flex items-center justify-between space-x-2">
+          <div>
+            <h3 className="font-medium">Notifications dans l'application</h3>
+            <p className="text-sm text-muted-foreground">Recevez des notifications dans l'application</p>
+          </div>
+          <Switch
+            id="notification_app"
+            checked={settings?.notification_app || false}
+            onCheckedChange={(value) => handleToggle('notification_app', value)}
+            disabled={isLoading || saving}
+          />
+        </div>
+        
+        {/* Dashboard Widgets */}
+        <div className="border rounded-md p-4">
+          <h3 className="font-medium mb-4">Widgets du tableau de bord</h3>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="widget_recent_clicks" 
+                checked={settings?.dashboard_widgets?.recentClicks || false}
+                disabled={isLoading || saving}
+              />
+              <Label htmlFor="widget_recent_clicks">Clics récents</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="widget_earnings_chart" 
+                checked={settings?.dashboard_widgets?.earningsChart || false}
+                disabled={isLoading || saving}
+              />
+              <Label htmlFor="widget_earnings_chart">Graphique des revenus</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="widget_top_affiliates" 
+                checked={settings?.dashboard_widgets?.topAffiliates || false}
+                disabled={isLoading || saving}
+              />
+              <Label htmlFor="widget_top_affiliates">Top affiliés</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="widget_product_performance" 
+                checked={settings?.dashboard_widgets?.productPerformance || false}
+                disabled={isLoading || saving}
+              />
+              <Label htmlFor="widget_product_performance">Performance des produits</Label>
+            </div>
+          </div>
           
-          <Card className="flex-1 bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200">
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-black flex items-center justify-center">
-                  {/* Using a custom icon for TikTok */}
-                  <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
-                  </svg>
-                </div>
-                <CardTitle>TikTok</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="mb-4">
-                Suivez-nous sur TikTok pour découvrir nos vidéos et tutoriels
-              </CardDescription>
-              <Button className="w-full bg-black hover:bg-black/90">
-                Suivre
-              </Button>
-            </CardContent>
-          </Card>
+          <Button variant="outline" size="sm" className="mt-4" disabled={isLoading || saving}>
+            Restaurer les paramètres par défaut
+          </Button>
         </div>
       </CardContent>
     </Card>
   );
-}
+};

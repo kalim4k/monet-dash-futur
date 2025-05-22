@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, CreditCard, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -6,7 +5,7 @@ import { PersonalInfoCard } from "./PersonalInfoCard";
 import { SecurityCard } from "./SecurityCard";
 import { PaymentMethodsCard } from "./PaymentMethodsCard";
 import { PaymentAccountCard } from "./PaymentAccountCard";
-import { SocialNetworksCard } from "./SocialNetworksCard";
+import { SocialNetworksCard, UserSettings } from "./SocialNetworksCard";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";

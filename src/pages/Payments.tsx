@@ -29,18 +29,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
-
-interface Transaction {
-  id: string;
-  amount: number;
-  description: string;
-  transaction_type: 'payment' | 'withdrawal' | 'bonus';
-  status: 'completed' | 'pending' | 'failed';
-  payment_method: string;
-  account_details: any;
-  created_at: string;
-  processed_at: string | null;
-}
+import { TransactionType, TransactionStatus, PaymentMethodType, Transaction, AccountDetails, convertAccountDetails } from "@/types/transaction";
 
 interface PaymentMethod {
   id: string;
@@ -191,7 +180,22 @@ const Payments = () => {
       
       if (error) throw error;
       
-      setTransactions(data || []);
+      if (data) {
+        // Convert the raw data to Transaction type
+        const typedTransactions: Transaction[] = data.map(tx => ({
+          id: tx.id,
+          amount: tx.amount,
+          description: tx.description || "",
+          transaction_type: tx.transaction_type as TransactionType,
+          status: tx.status as TransactionStatus,
+          payment_method: tx.payment_method || "",
+          account_details: convertAccountDetails(tx.account_details),
+          created_at: tx.created_at,
+          processed_at: tx.processed_at
+        }));
+        
+        setTransactions(typedTransactions);
+      }
     } catch (error) {
       console.error("Error fetching transactions:", error);
     }
@@ -315,7 +319,7 @@ const Payments = () => {
       }
       
       // Create withdrawal transaction
-      const { data: transaction, error } = await supabase
+      const { data: newTx, error } = await supabase
         .from('transactions')
         .insert({
           user_id: user.id,
@@ -335,6 +339,18 @@ const Payments = () => {
       if (error) throw error;
       
       // Update local state
+      const transaction: Transaction = {
+        id: newTx.id,
+        amount: newTx.amount,
+        description: newTx.description || "",
+        transaction_type: newTx.transaction_type as TransactionType,
+        status: newTx.status as TransactionStatus,
+        payment_method: newTx.payment_method || "",
+        account_details: convertAccountDetails(newTx.account_details),
+        created_at: newTx.created_at,
+        processed_at: newTx.processed_at
+      };
+      
       setTransactions([transaction, ...transactions]);
       setBalance(prevBalance => prevBalance - amount);
       setWithdrawAmount("");
@@ -537,7 +553,12 @@ const Payments = () => {
                       <div>
                         <div className="flex justify-between items-center mb-4">
                           <h4 className="font-medium">Paiements récents</h4>
-                          <Button variant="outline" size="sm" onClick={() => document.querySelector('[data-state="inactive"][data-value="history"]')?.click()}>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            const element = document.querySelector('[data-state="inactive"][data-value="history"]');
+                            if (element) {
+                              (element as HTMLElement).click();
+                            }
+                          }}>
                             Voir tout
                           </Button>
                         </div>
@@ -876,7 +897,7 @@ const Payments = () => {
                         {isLoading ? (
                           <>
                             <div className="mr-2 animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                            Actualisation...
+                            Actualiser...
                           </>
                         ) : (
                           "Actualiser le solde"
@@ -926,7 +947,12 @@ const Payments = () => {
                           )}
                             
                           <div className="p-3 flex justify-center">
-                            <Button variant="ghost" size="sm" className="text-xs w-full" onClick={() => document.querySelector('[data-state="inactive"][data-value="history"]')?.click()}>
+                            <Button variant="ghost" size="sm" className="text-xs w-full" onClick={() => {
+                              const element = document.querySelector('[data-state="inactive"][data-value="history"]');
+                              if (element) {
+                                (element as HTMLElement).click();
+                              }
+                            }}>
                               Voir tout l'historique
                             </Button>
                           </div>
@@ -1189,3 +1215,5 @@ const Payments = () => {
 };
 
 export default Payments;
+
+</edits_to_apply>

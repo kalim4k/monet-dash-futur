@@ -8,7 +8,7 @@ interface ProductProgressBarProps {
 }
 
 const ProductProgressBar = ({ currentCount, requiredCount }: ProductProgressBarProps) => {
-  // Calculer le pourcentage de progression
+  // Calculate the progress percentage
   const progressPercentage = Math.min(Math.floor((currentCount / requiredCount) * 100), 100);
   
   return (

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -112,7 +111,8 @@ const History = () => {
         date: new Date(tx.created_at),
         amount: tx.amount,
         method: tx.payment_method as "momo" | "orange" | "paypal",
-        account: tx.account_details?.number || '',
+        account: tx.account_details && typeof tx.account_details === 'object' ? 
+             (tx.account_details as Record<string, any>).number || '' : '',
         status: tx.status as "completed" | "pending" | "failed"
       }));
       

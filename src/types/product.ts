@@ -1,43 +1,46 @@
 
-export type PaymentMethod = "momo" | "orange" | "paypal" | "bank";
-export type TransactionType = "payment" | "withdrawal" | "bonus";
-export type TransactionStatus = "completed" | "pending" | "failed";
-
-export interface Transaction {
+export type Product = {
   id: string;
-  user_id: string;
-  amount: number;
-  description: string;
-  transaction_type: TransactionType;
-  status: TransactionStatus;
-  payment_method: string;
-  account_details: Record<string, any>;
-  created_at: string;
-  processed_at: string | null;
-}
-
-export interface PaymentMethod {
-  id: string;
-  user_id: string;
-  type: string;
   name: string;
-  account_number: string;
-  details: Record<string, any>;
-  is_default: boolean;
-  created_at: string;
-}
+  description?: string;
+  imageUrl?: string;
+  price?: number;
+  isActive?: boolean;
+  createdAt?: string;
+};
 
-export interface UserSettings {
+export type AffiliatePerformance = {
   id: string;
-  user_id: string;
-  theme: string;
-  language: string;
-  notification_email: boolean;
-  notification_app: boolean;
-  dashboard_widgets: Record<string, boolean>;
-  auto_withdrawal: boolean;
-  auto_withdrawal_threshold: number | null;
-  auto_withdrawal_method_id: string | null;
-  created_at: string;
-  updated_at: string;
-}
+  clicks: number;
+  conversions: number;
+  revenue: number;
+};
+
+export type UserProductStats = {
+  id: string;
+  product_id: string;
+  totalClicks: number;
+  uniqueClicks: number;
+  conversionRate: number;
+  earnings: number;
+};
+
+export type PaymentMethodType = {
+  id: string;
+  type: "momo" | "orange" | "paypal" | "bank";
+  accounts: {
+    id: string;
+    type: string;
+    number: string;
+    name: string;
+  }[];
+};
+
+export type Transaction = {
+  id: string;
+  date: Date;
+  amount: number;
+  method: "momo" | "orange" | "paypal";
+  account: string;
+  status: "completed" | "pending" | "failed";
+};
