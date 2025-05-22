@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { WeeklyEarnings } from "@/components/WeeklyEarnings";
 import { ProductRevenuePieChart } from "@/components/ProductRevenuePieChart";
 import { toast } from "@/hooks/use-toast";
+import { convertAccountDetails } from "@/types/transaction";
 
 const History = () => {
   const { user } = useAuth();
@@ -205,7 +206,8 @@ const History = () => {
         date: new Date(transactionData.created_at),
         amount: transactionData.amount,
         method: transactionData.payment_method as "momo" | "orange" | "paypal",
-        account: transactionData.account_details?.number || "",
+        account: transactionData.account_details && typeof transactionData.account_details === 'object' ? 
+          (convertAccountDetails(transactionData.account_details).number || '') : '',
         status: "pending"
       };
       
