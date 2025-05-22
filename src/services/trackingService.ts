@@ -12,6 +12,9 @@ const BOT_USER_AGENTS = [
   'mj12bot', 'dotbot', 'rogerbot', 'yandexbot', 'sistrix'
 ];
 
+// Constante pour le revenu par clic
+const REVENUE_PER_CLICK = 10; // 10 FCFA par clic au lieu de 1 FCFA
+
 /**
  * Vérifie si l'utilisateur est probablement un bot basé sur son user agent
  * @param userAgent Le user agent du navigateur

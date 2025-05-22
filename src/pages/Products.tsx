@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -333,7 +332,7 @@ const Products = () => {
                       {product.clicks_count !== undefined && user && (
                         <div className="text-sm text-muted-foreground mb-2">
                           Clics générés: <span className="font-semibold">{product.clicks_count}</span>
-                          <span className="ml-2 text-primary font-medium">({product.clicks_count} FCFA)</span>
+                          <span className="ml-2 text-primary font-medium">({product.clicks_count * 10} FCFA)</span>
                         </div>
                       )}
                       

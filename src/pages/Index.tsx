@@ -1,3 +1,4 @@
+
 import { ArrowUpRight, ChevronUp, Award, MousePointer, TrendingUp, User, CreditCard, DollarSign, Activity } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ClicksPerProductChart } from "@/components/ClicksPerProductChart";
@@ -27,13 +28,13 @@ const Index = () => {
   // Fonction pour charger les statistiques de l'utilisateur
   const loadUserStats = async (userId: string) => {
     try {
-      // Récupérer les revenus totaux (1 FCFA par clic)
+      // Récupérer les revenus totaux (10 FCFA par clic)
       const { data: totalEarnings, error: totalError } = await supabase.rpc(
         'get_affiliate_earnings', 
         { user_id: userId }
       );
       
-      // Récupérer les revenus hebdomadaires (1 FCFA par clic)
+      // Récupérer les revenus hebdomadaires (10 FCFA par clic)
       const { data: weeklyEarnings, error: weeklyError } = await supabase.rpc(
         'get_affiliate_weekly_earnings',
         { user_id: userId }
@@ -62,7 +63,7 @@ const Index = () => {
       }
       
       setEarnings({
-        // 1 FCFA par clic
+        // 10 FCFA par clic
         total: totalEarnings || 0, 
         weekly: weeklyEarnings || 0,
         clicks: clicksData || 0,
