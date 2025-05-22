@@ -45,6 +45,7 @@ const Payments = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   
+  // User earnings and stats state
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("momo");
   const [mobileNumber, setMobileNumber] = useState("");
@@ -142,7 +143,6 @@ const Payments = () => {
       const { data: monthlyClicks, error: monthlyError } = await supabase
         .from('clicks')
         .select('id')
-        .join('affiliate_links', 'affiliate_links.id=clicks.affiliate_link_id')
         .eq('affiliate_links.user_id', user.id)
         .gte('clicked_at', startOfMonth.toISOString())
         .count();
