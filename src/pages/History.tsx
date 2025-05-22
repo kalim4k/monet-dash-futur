@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { WeeklyEarnings } from "@/components/WeeklyEarnings";
 import { ProductRevenuePieChart } from "@/components/ProductRevenuePieChart";
 import { toast } from "@/hooks/use-toast";
-import { convertAccountDetails } from "@/types/transaction";
+import { convertAccountDetails, PaymentMethod } from "@/types/transaction";
 
 const History = () => {
   const { user } = useAuth();
@@ -27,7 +27,7 @@ const History = () => {
   const [transactions, setTransactions] = useState<PaymentHistoryItem[]>([]);
   
   // Payment methods state
-  const [paymentMethods, setPaymentMethods] = useState(generateMockPaymentMethods());
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(generateMockPaymentMethods());
   
   // Withdrawal count for tier system
   const [withdrawalCount, setWithdrawalCount] = useState(0);
@@ -160,7 +160,7 @@ const History = () => {
       if (data && data.length > 0) {
         // Group payment methods by type
         const methodsByType = data.reduce((acc, method) => {
-          const type = method.type as "momo" | "orange" | "paypal" | "wave" | "moov" | "yass";
+          const type = method.type as PaymentMethodType;
           if (!acc[type]) {
             acc[type] = {
               id: type,
@@ -175,40 +175,40 @@ const History = () => {
             name: method.name
           });
           return acc;
-        }, {} as Record<string, any>);
+        }, {} as Record<string, PaymentMethod>);
         
         setPaymentMethods(Object.values(methodsByType));
       } else {
         // Si aucune méthode n'est trouvée, ajouter au moins les méthodes par défaut
-        const defaultMethods = [
+        const defaultMethods: PaymentMethod[] = [
           {
             id: "paypal",
-            type: "paypal" as "paypal",
+            type: "paypal",
             accounts: []
           },
           {
             id: "momo",
-            type: "momo" as "momo",
+            type: "momo",
             accounts: []
           },
           {
             id: "orange",
-            type: "orange" as "orange",
+            type: "orange",
             accounts: []
           },
           {
             id: "wave",
-            type: "wave" as "wave",
+            type: "wave",
             accounts: []
           },
           {
             id: "moov",
-            type: "moov" as "moov",
+            type: "moov",
             accounts: []
           },
           {
             id: "yass",
-            type: "yass" as "yass",
+            type: "yass",
             accounts: []
           }
         ];

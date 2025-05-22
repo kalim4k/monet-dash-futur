@@ -24,6 +24,17 @@ export interface AccountDetails {
   [key: string]: any;
 }
 
+export interface PaymentMethod {
+  id: string;
+  type: PaymentMethodType;
+  accounts: {
+    id: string;
+    type: string;
+    number: string;
+    name: string;
+  }[];
+}
+
 // Helper to safely convert from Supabase JSON type to AccountDetails
 export function convertAccountDetails(details: Json | null): AccountDetails {
   if (!details) return {};
