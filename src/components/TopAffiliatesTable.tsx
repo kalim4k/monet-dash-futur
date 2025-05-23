@@ -16,6 +16,9 @@ type Affiliate = {
   clicks: number;
 };
 
+// Constante pour le revenu par clic
+const REVENUE_PER_CLICK = 10; // 10 FCFA par clic
+
 export function TopAffiliatesTable() {
   const [affiliates, setAffiliates] = useState<Affiliate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,7 +41,8 @@ export function TopAffiliatesTable() {
           id: item.id || '',
           name: item.name || 'Utilisateur Anonyme',
           photo: item.photo,
-          earnings: item.earnings || 0,
+          // Multiplie par 10 pour avoir 10 FCFA par clic
+          earnings: (item.earnings || 0) * REVENUE_PER_CLICK,
           clicks: item.clicks || 0
         }));
         

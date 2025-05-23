@@ -63,9 +63,9 @@ const Index = () => {
       }
       
       setEarnings({
-        // 10 FCFA par clic
-        total: totalEarnings || 0, 
-        weekly: weeklyEarnings || 0,
+        // Multiplication par 10 pour avoir 10 FCFA par clic
+        total: (totalEarnings || 0) * 10, 
+        weekly: (weeklyEarnings || 0) * 10,
         clicks: clicksData || 0,
         bonus: 0 // Pour le moment, pas de système de bonus
       });
@@ -130,7 +130,7 @@ const Index = () => {
                     <div>
                       <p className="text-sm font-medium text-pink-600 dark:text-pink-300">Gains Totaux</p>
                       <h3 className="text-3xl font-bold mt-2">{earnings.total} FCFA</h3>
-                      <p className="text-xs text-muted-foreground mt-1">1 FCFA par clic généré</p>
+                      <p className="text-xs text-muted-foreground mt-1">10 FCFA par clic généré</p>
                     </div>
                     <div className="h-10 w-10 bg-pink-200 dark:bg-pink-800/30 rounded-full flex items-center justify-center">
                       <CreditCard className="h-5 w-5 text-pink-600 dark:text-pink-300" />

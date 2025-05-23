@@ -33,6 +33,9 @@ const dayMap: Record<number, number> = {
   6: 5  // Saturday is index 5
 };
 
+// Constante pour le revenu par clic
+const REVENUE_PER_CLICK = 10; // 10 FCFA par clic
+
 export function WeeklyEarnings() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -99,8 +102,8 @@ export function WeeklyEarnings() {
           const dayOfWeek = clickDate.getDay(); // 0 is Sunday, 1 is Monday, etc.
           const dayIndex = dayMap[dayOfWeek]; // Map to our array index (0 for Monday)
           
-          // Each click is worth 1 FCFA
-          initialData[dayIndex].earnings += 1;
+          // Each click is worth 10 FCFA
+          initialData[dayIndex].earnings += REVENUE_PER_CLICK;
         });
       }
       

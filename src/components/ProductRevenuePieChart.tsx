@@ -12,6 +12,9 @@ interface ProductRevenue {
   color: string;
 }
 
+// Constante pour le revenu par clic
+const REVENUE_PER_CLICK = 10; // 10 FCFA par clic
+
 const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
 const COLOR_MAP: {[key: string]: string} = {};
 
@@ -78,10 +81,10 @@ export function ProductRevenuePieChart() {
         });
       }
 
-      // Transform the data for the pie chart
+      // Transform the data for the pie chart - multiply by REVENUE_PER_CLICK for 10 FCFA per click
       const revenueData = Object.keys(productClicks).map(productId => ({
         name: productMap[productId] || 'Unknown Product',
-        value: productClicks[productId],
+        value: productClicks[productId] * REVENUE_PER_CLICK,
         color: COLOR_MAP[productId] || '#CCCCCC'
       }));
 
@@ -89,7 +92,7 @@ export function ProductRevenuePieChart() {
       revenueData.sort((a, b) => b.value - a.value);
 
       setProductRevenue(revenueData);
-      setTotal(totalClicks);
+      setTotal(totalClicks * REVENUE_PER_CLICK); // Apply 10 FCFA per click here too
     } catch (error) {
       console.error("Error in fetchProductRevenue:", error);
     } finally {
