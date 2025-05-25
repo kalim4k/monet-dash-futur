@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowDown, Wallet, AlertCircle } from "lucide-react";
+import { ArrowDown, Wallet, AlertCircle, BookOpen, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -206,6 +205,9 @@ export function WithdrawalForm({ balance, savedMethods, onSubmit, withdrawalCoun
   // L'index du palier actuel
   const currentTierIndex = Math.min(withdrawalCount, 2);
 
+  // Vérifier si on doit afficher la suggestion PayPal
+  const shouldShowPayPalSuggestion = selectedMethod === "paypal" && balance >= WITHDRAWAL_TIERS.FIRST;
+
   return (
     <Card className="bg-gradient-to-br from-white to-gray-50 border shadow-sm">
       <CardHeader>
@@ -319,6 +321,33 @@ export function WithdrawalForm({ balance, savedMethods, onSubmit, withdrawalCoun
                 </FormItem>
               )}
             />
+
+            {/* Suggestion PayPal */}
+            {shouldShowPayPalSuggestion && (
+              <Alert className="bg-blue-50 border-blue-200">
+                <BookOpen className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-800">
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-medium">💡 Créez votre compte PayPal éligible !</p>
+                      <p className="text-sm">
+                        Pour retirer vos gains sans problème, nous recommandons ce guide complet pour créer et configurer votre compte PayPal.
+                      </p>
+                    </div>
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full bg-white hover:bg-blue-50 border-blue-300 text-blue-700"
+                      onClick={() => window.open('https://odqwetyq.mychariow.com/prd_n5u916', '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Voir le guide PayPal
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
 
             <FormField
               control={form.control}
