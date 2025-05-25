@@ -7,6 +7,7 @@ import { Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTracking } from "@/hooks/useTracking";
 import ProductProgressBar from "@/components/ProductProgressBar";
+import EarningsCallToAction from "@/components/EarningsCallToAction";
 
 const CapcutProPage = () => {
   const [clickCount, setClickCount] = useState(() => {
@@ -159,6 +160,9 @@ const CapcutProPage = () => {
               </div>
             </div>
           </Card>
+          
+          {/* Publicité pour inciter à l'inscription */}
+          <EarningsCallToAction />
         </div>
       </main>
     </div>
